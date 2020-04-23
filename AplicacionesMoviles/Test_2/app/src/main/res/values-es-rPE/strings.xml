@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Test_2</string>
+    <string name="bienvenido">Bienvenido</string>
+    <string name="entrar">Ingresar</string>
+</resources>
