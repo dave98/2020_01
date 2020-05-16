@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Quiz</string>
+    <string name="question_text">Questions are coming</string>
+    <string name="true_button">TRUE</string>
+    <string name="false_button">False</string>
+    <string name="correct_toast">Correct!</string>
+    <string name="incorrect_toast">Incorrect!</string>
+
+    <string name="question_ocean">The Pacific ocean is larger than the Atlantic ocean</string>
+    <string name="question_mideast">The Suez Canal connects the Red Sea and the Indian Ocean</string>
+    <string name="question_africa">The source if the Nile river is in Egypt</string>
+    <string name="question_america">The Amazon river is the longest river in the America</string>
+    <string name="question_asia">Lake Baikal is the world\'s oldest and deepest freshwater lake.</string>
+    <string name="next_button">NEXT</string>
+</resources>
