@@ -1,0 +1,12 @@
+1. Ver los videos de HadoopTutorial para la creación de projectos en Java
+2. Configurando Hadoop
+	- No hay necesidad de instalar un cluster Hadoop en Windows, solo se necesita el winutils adecuado (2.8.5 <-> 2.8.3)
+	  https://github.com/steveloughran/winutils 
+	- Ver https://community.talend.com/t5/Design-and-Development/Exception-in-thread-quot-main-quot-java-lang/td-p/160632
+		en caso no se pueda:
+		- Copiar hadoop.dll del winutils descargado en C:/Windows/System32
+		- Crear una variable de entorno para el SISTEMA(ventana de arriba)
+			HADOOP_HOME -> dirección de winutils (el directorio)  ejemplo: D:\hadoop-2.8.3
+
+		- Añadir al Path(ventana de abajo): %HADOOP_HOME%\bin\winutils.exe
+		- Y listo me funciono

@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Reading Cat</string>
+    <string name="app_subname">We all love reading...</string>
+    <string name="app_login_description">Welcome</string>
+    <string name="app_login_username">Username</string>
+    <string name="app_login_password">Password</string>
+    <string name="app_login_forget_password">Forget Password?</string>
+    <string name="app_login_login">Login</string>
+</resources>

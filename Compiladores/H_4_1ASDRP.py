@@ -14,48 +14,150 @@ Tp := * F Tp  |  /  F Tp  | lambda
 F  := ( E ) | num | id
 """
 
+class CATsintatic_table:
+    def __init__(self):
+        self.table = {} # dictionary of dictionary
+
+    def insert(self, key1, key2, inter_val):
+        key1 = key1.strip()
+        key2 = key2.strip()
+        inter_val = inter_val.strip()
+        if not self.table.get(key1):
+            self.table[key1] = {}
+            self.table[key1][key2] = inter_val
+
+        elif not self.table[key1].get(key2):
+            self.table[key1][key2] = inter_val
+
+        else: # No actualizamos la tabla
+            pass
+
+    def get_from_keys(self, key1, key2):
+        if not self.table.get(key1) or not self.table[key1].get(key2):
+            return "ERROR"
+        else:
+            return self.table[key1][key2]
+
+    def get(self, key1, key2):
+        try:
+            print("[" + str(key1) + "][" + str(key2) + "] = [" + str(self.table[key1][key2]) + "]")
+        except:
+            if not self.table.get(key1):
+                print("[" + str(key1) + "]", "no esta definido en la tabla")
+            else:
+                print("No se ha definido un valor para " + "[" + str(key1) + "][" + str(key2) + "]")
+
+
+    def format_matrix(self, header, matrix, top_format, left_format, cell_format, row_delim, col_delim):
+        table = [[''] + header] + [row for name, row in zip(header, matrix)]
+        table_format = [['{:^{}}'] + len(header) * [top_format]] + len(matrix) * [[left_format] + len(header) * [cell_format]]
+        col_widths = [max( len(format.format(cell, 0)) for format, cell in zip(col_format, col)) for col_format, col in zip(zip(*table_format), zip(*table))]
+        return row_delim.join( col_delim.join( format.format(cell, width) for format, cell, width in zip(row_format, row, col_widths)) for row_format, row in zip(table_format, table))
+
+    def __str__(self):
+        print("TABLE")
+
+        total_terminals = []
+        total_terminals.append(" ")
+        m_matrix = []
+        for x in self.table:
+            total_terminals = total_terminals + list(self.table[x].keys())
+        total_terminals = [i for n, i in enumerate(total_terminals) if i not in total_terminals[:n]]
+
+
+        for x in self.table:
+            t_matrix = []
+            t_matrix.append(x)
+            for i in total_terminals:
+                if not self.table[x].get(i):
+                    t_matrix.append(" ")
+                else:
+                    t_matrix.append(self.table[x][i])
+            m_matrix.append(t_matrix)
+
+        print(self.format_matrix(total_terminals, m_matrix, '{:^{}}', '{:<{}}', '{:>{}}', '\n', ' | '))
+        return ""
 
 
 class CATproduction:
     def __init__(self):
         self.grammar_dictionary = {}
 
+    def is_usable(self):
+        if not self.grammar_dictionary.keys():
+            return False
+        else:
+            return True
+
+    # key representan los nodos no terminales
+    def is_key_on_dictionary(self, key):
+        if not self.grammar_dictionary.get(key):
+            return False
+        else:
+            return True
+
+    def get_key_values(self, key):
+        if not self.is_key_on_dictionary(key):
+            print("No existe el no-terminal solicitado")
+            return []
+        else:
+            return self.grammar_dictionary.get(key)
+
+    # Returns all values from all keys
+    def get_all_values(self):
+        return list(self.grammar_dictionary.values())
+
+
 class CATgrammar:
     def __init__(self):
         self.raw_grammar = []
 
         self.productions = CATproduction()
+        self.my_table = CATsintatic_table()
         self.terminals = []
         self.non_terminals = []
 
         self.component_separator = ""
         self.right_component_separator = ""
+        self.empty_component = ""
 
-    def reader(self):
-        print("CAT:/ Escriba o pegue la gramatica(ctrl+v). Para finalizar presione ctrl+(z/d) (+ enter si es necesario)")
+    def reader(self, for_root = True):
+        temporal_container = [] # En caso procesamos la lectura de otra manera
+        if for_root:
+            print("CAT:/ Escriba o pegue la gramatica(ctrl+v). Para finalizar presione ctrl+(z/d) (+ enter si es necesario)")
+        else:
+            print("CAT:/ Escriba o pegue la cadena a validar(ctrl+v). Para finalizar presione ctrl+(z/d) (+ enter si es necesario)")
         while True:
             try:
                 line = input()
             except EOFError:
                 break
-            self.raw_grammar.append(line)
+
+            if for_root:
+                self.raw_grammar.append(line)
+            else:
+                temporal_container.append(line)
+
+        if not for_root:
+            return temporal_container
+
 
     def _get_non_terminals(self): # Intern class function, don't use it.
         for dictionary_key in self.productions.grammar_dictionary:
             self.non_terminals.append(dictionary_key)
-
 
     def _get_terminals(self): # Intern class function, don't use it.
         for dictionary_key in self.productions.grammar_dictionary:
             for dictionary_value in self.productions.grammar_dictionary[dictionary_key]:
                 disgregated = dictionary_value.split()
                 for i in disgregated:
-                    if not self.productions.grammar_dictionary.get(i):
+                    if not self.productions.grammar_dictionary.get(i) and not i in self.terminals:
                         self.terminals.append(i)
 
-    def process_grammar(self, component_separator = ":=", right_component_separator = "|" ): # Use only if we put something in raw data
+    def process_grammar(self, component_separator = ":=", right_component_separator = "|", empty_component = "lambda" ): # Use only if we put something in raw data
         self.component_separator = component_separator
         self.right_component_separator = right_component_separator
+        self.empty_component = empty_component
         print("CAT:/ Procesando gramática...")
         for line in self.raw_grammar:  # Separator is used to split left elements from right elements, by default is ":=" but could be anything
             line_tuple = line.split(component_separator) # Left member = line_tuple[0], Right members = line_tuple[1:]
@@ -64,13 +166,166 @@ class CATgrammar:
             if not self.productions.grammar_dictionary.get(line_left_member): # WARNING: Need a interface. Now is using direct modification
                 self.productions.grammar_dictionary[line_left_member] = []
 
-
             line_rigth_member = line_tuple[1].split(right_component_separator)
             for component_in_right_member in line_rigth_member: # WARNING: Should apply a review to see if left member is in dictionary
                 self.productions.grammar_dictionary[line_left_member].append(component_in_right_member.strip())
 
         self._get_terminals()
         self._get_non_terminals()
+
+    # Primer nodo terminal a la derecha de la produccion
+    def get_primero(self, not_terminal):
+        if not self.productions.is_usable():
+            print("No se puede utilizar esta funcion sin construir la gramatica")
+            return
+        if not_terminal in self.terminals:
+            return [not_terminal]
+        elif not self.productions.is_key_on_dictionary(not_terminal):
+            print(not_terminal, "no existe")
+            return ""
+        else:
+            terminal_founded = False
+            t_production = self.productions.get_key_values(not_terminal)[0] #WARNING Assuming each non terminal has at least one production. Check later
+            t_production = t_production.split()[0] # WARNING Assuming each composition is separated by " "
+            while not terminal_founded:
+                #print("Looking for:", t_production)
+                if t_production in self.terminals:
+                    terminal_founded = True # Just to be sure
+                    return t_production
+                elif not self.productions.is_key_on_dictionary(t_production):
+                    print("ERROR: Gramatica mal estructurada - Imposible encontrar primero para", not_terminal)
+                    terminal_founded = True
+                    return ""
+                else:
+                    t_production = self.productions.get_key_values(t_production)[0].split()[0]
+
+    def get_primeros(self, not_terminal, verified = True, n_recursive = 0, update_table=False):
+        if verified:
+            print("-->", not_terminal, ": ", end = '')
+            if not self.productions.is_usable():
+                print("No se puede utilizar esta funcion sin construir la gramatica")
+                return ""
+
+        if not_terminal in self.terminals:
+            return [not_terminal]
+        elif not self.productions.is_key_on_dictionary(not_terminal):
+            print(not_terminal, "no existe")
+            return ""
+        else:
+            g_primeros = []
+            t_productions = self.productions.get_key_values(not_terminal)
+            for t_production in t_productions:
+                o_t_production = t_production
+                t_production = t_production.split()[0]
+                g_primeros = g_primeros + self.get_primeros(t_production, False, n_recursive+1) # Can't use append. It creates a list of lists
+
+                # Algoritmo imbuido para actualizar tabla
+                if n_recursive == 0 and update_table:
+                    for g in g_primeros:
+                        if g != self.empty_component:
+                            self.my_table.insert(not_terminal, g, o_t_production) #No termina, Terminal, Cruce
+                        else:
+                            lambda_adding = self.get_siguientes(not_terminal, verified=False)
+                            for lam in lambda_adding:
+                                self.my_table.insert(not_terminal, lam, self.empty_component)
+
+            return g_primeros
+
+    def get_siguientes(self, i_terminal, verified = True, n_recursive = 0):
+        if verified:
+            print("--> Siguientes de ", i_terminal, ": ", end = '')
+            if not self.productions.is_usable():
+                print("No se puede utilizar esta funcion sin construir la gramatica")
+                return ""
+
+        if i_terminal in self.terminals:
+            return [i_terminal]
+        elif not self.productions.is_key_on_dictionary(i_terminal):
+            print(i_terminal, "no existe")
+            return ""
+        else:
+            a_siguiente = []
+
+            if (self.non_terminals.index(i_terminal) == 0):
+                a_siguiente.append("$")
+
+            all_productions = self.productions.get_all_values() # Contains a list with all rigth productions organized in a list of lists
+                                                                # Each list in this list comes from a specific non terminal in its postion is according to the same non terminal in self.non_terminals
+
+            for nonterminal_production in all_productions:
+                prepare_for_circular_references = False
+                if all_productions.index(nonterminal_production) == self.non_terminals.index(i_terminal):
+                    prepare_for_circular_references = True
+
+                for in_production in nonterminal_production:
+                    in_production = in_production.split()
+                    if i_terminal in in_production: # Verificamos si el no terminal con el que trabajamos esta en una produccion para extraer el siguiente
+
+                        p_index = in_production.index(i_terminal)
+                        if p_index + 1 >= len(in_production): # Verificando si no existe un componente derecho. En caso no lo hay, extraemos los siguientes de la raiz de la produccion
+                            if not prepare_for_circular_references: #WARNING Teacher didn't mention anything about this situation
+                                a_siguiente = a_siguiente + self.get_siguientes(self.non_terminals[all_productions.index(nonterminal_production)], verified=False,n_recursive=2)
+                        else: # En caso si hay un miembro al lado derecho, extraemos sus primeros
+                            next_member =  in_production[p_index +1]
+                            next_primeros = self.get_primeros(next_member, False, n_recursive=1)
+
+                            if self.empty_component in next_primeros:
+                                next_primeros =  next_primeros + self.get_siguientes(next_member, verified=False, n_recursive=2)
+                                next_primeros = [elem for elem in next_primeros if elem != self.empty_component] # Deleting empty_component
+
+                            a_siguiente = a_siguiente + next_primeros
+
+            return [i for n, i in enumerate(a_siguiente) if i not in a_siguiente[:n]] # Avoiding duplicates
+
+
+    def fill_dictionary(self):
+        for _no_terminal in self.non_terminals:
+            self.get_primeros(_no_terminal, verified=False, update_table=True) # El codigo de get primeros, mientras recorre puede actualizar la tabla semantica
+        print(self.my_table)
+
+    def chain_validation(self, debug = False):
+        raw_chain = self.reader(for_root = False)
+
+        for chain in raw_chain: # Validando linea por linea
+            print("Validando: ", chain)
+            entry = chain.split()
+            stack = ["$"]
+
+            stack.append(self.non_terminals[0]) # Push estadoInicial
+            entry.append("$")
+
+            while(entry and stack):
+                if debug:
+                    print("Cadena: ", entry)
+                    print("Entrada: ", stack)
+
+                if (stack[len(stack)-1] == entry[0]):
+                    stack.pop() #Deleting last element
+                    entry.pop(0)
+                else:
+                    temp1 = stack.pop() # Getting and deleting last element
+                    temp2 = entry[0]
+                    x_val = self.my_table.get_from_keys(temp1, temp2).split()
+                    x_val.reverse()
+
+                    if x_val[0] == "ERROR":
+                        break
+
+                    else:
+                        for x in x_val:
+                            if x != self.empty_component:
+                                stack.append(x)
+
+            if(not stack and not entry):
+                print("\t Cadena aceptada")
+            else:
+                print("\t Cadena invalida")
+
+
+ 
+    def print_dictionary(self):
+        print("DICTIONARY")
+        print(self.productions.grammar_dictionary)
 
     def print_raw_grammar(self):
         print("Gramatica Bruta: ")
@@ -95,9 +350,31 @@ class CATgrammar:
             print(sentence)
         return "\n"
 
+# --------------------------------------------------------------------------------
 # ---------------------------  START HERE ----------------------------------------
+# --------------------------------------------------------------------------------
+"""   --> CUIDADO <-- Insertar gramáticas acorde a este modelo.
+E  := T Ep
+Ep := + T Ep
+Ep := - T Ep
+Ep := lambda
+T  := F Tp
+Tp := * F Tp  |  /  F Tp  | lambda
+F  := ( E ) | num | id
+"""
 my_grammar = CATgrammar()
-my_grammar.reader() # Just type or paste the grammar
+my_grammar.reader()           # Just type or paste the grammar
 my_grammar.process_grammar(); #  IN DEFAULT: process_grammar(component_separator=":=", right_component_separator="|")
                               #  Set according grammar separators
 print(my_grammar)
+print(my_grammar.get_siguientes("F")) # +++++ NUEVO GET_SIGUIENTE +++++++
+my_grammar.fill_dictionary()  # Funcion para llenar diccionario
+
+""" Cadenas a validar
+num + num + num + num
+( num + num ) + ( num + num )
+( num * ) num
+num * ( num * num )
+"""
+my_grammar.chain_validation() # Just type or paste the chain for validation
+#my_grammar.chain_validation(debug=True) # Ver el proceso de validacion

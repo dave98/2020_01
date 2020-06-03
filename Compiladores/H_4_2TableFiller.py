@@ -3,7 +3,6 @@ Created on SAT MAY 09 10:45:21 2020
 TABLE FILLER
 @author: DAVE
 """
-
 class CATsintatic_table:
     def __init__(self):
         self.table = {} # dictionary of dictionary
@@ -33,6 +32,36 @@ class CATsintatic_table:
                 print("No se ha definido un valor para " + "[" + str(key1) + "][" + str(key2) + "]")
 
 
+    def format_matrix(self, header, matrix, top_format, left_format, cell_format, row_delim, col_delim):
+        table = [[''] + header] + [row for name, row in zip(header, matrix)]
+        table_format = [['{:^{}}'] + len(header) * [top_format]] + len(matrix) * [[left_format] + len(header) * [cell_format]]
+        col_widths = [max( len(format.format(cell, 0)) for format, cell in zip(col_format, col)) for col_format, col in zip(zip(*table_format), zip(*table))]
+        return row_delim.join( col_delim.join( format.format(cell, width) for format, cell, width in zip(row_format, row, col_widths)) for row_format, row in zip(table_format, table))
+
+    def __str__(self):
+        print("TABLE")
+
+        total_terminals = []
+        total_terminals.append(" ")
+        m_matrix = []
+        for x in self.table:
+            total_terminals = total_terminals + list(self.table[x].keys())
+        total_terminals = [i for n, i in enumerate(total_terminals) if i not in total_terminals[:n]]
+
+
+        for x in self.table:
+            t_matrix = []
+            t_matrix.append(x)
+            for i in total_terminals:
+                if not self.table[x].get(i):
+                    t_matrix.append(" ")
+                else:
+                    t_matrix.append(self.table[x][i])
+            m_matrix.append(t_matrix)
+
+        print(self.format_matrix(total_terminals, m_matrix, '{:^{}}', '{:<{}}', '{:>{}}', '\n', ' | '))
+        return ""
+        
 # ---------------------------  START HERE ----------------------------------------
 my_table = CATsintatic_table()
 # FILLING UP
@@ -69,3 +98,5 @@ my_table.get("E", "+")  # Not defined
 my_table.get("Ep", "/")  # Not defined
 
 my_table.get("Ea", "+")  # Not Valid
+
+print(my_table)

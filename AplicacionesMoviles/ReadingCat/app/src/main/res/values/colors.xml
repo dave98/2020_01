@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 6200EE, 3700B3, 03DAC5 -->
+    <color name="colorPrimary">#303030</color>
+    <color name="colorPrimaryDark">#303030</color>
+    <color name="colorAccent">#D1D1D1</color>
+    <color name="colorTitle">#ffffff</color>
+    <color name="backgroundColor">#1C1C1C</color>
+    <color name="loginHintsColor">#B3B3B3</color>
+</resources>
