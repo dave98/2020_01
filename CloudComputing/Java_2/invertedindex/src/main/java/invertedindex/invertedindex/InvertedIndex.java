@@ -42,7 +42,7 @@ public class InvertedIndex {
 			if(words.length != 0) {
 				for(int i = 0; i < words.length-1; i++) {
 					if(words[i].matches("[a-zA-Z]+") && words[i+1].matches("[a-zA-Z]+")) {
-					System.out.println(words[i] + "--" + words[i+1]);
+					//System.out.println(words[i] + "--" + words[i+1]);
 					context.write(new Text(words[i]), new Text(words[i+1]));
 					}
 				}
