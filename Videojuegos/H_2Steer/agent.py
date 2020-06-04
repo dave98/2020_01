@@ -19,7 +19,7 @@ class Agent(object):
         self.force = Vec2(0, 0)
         self.wander_angle = 45.0
         self.heading = Vec2(0, 0)
-        self.max_velocity = 300
+        self.max_velocity = 200
 
         self.neighbors_pos = [] ##
         self.my_id = initial_id          ##
@@ -42,11 +42,15 @@ class Agent(object):
         #New behaviors
         self.indarrive = False
         self.indstop = False
+
         self.indseparate = False
         self.indseparate_state_1 = True
-        self.indseparate_state_2 = False
+        self.indseparate_state_2 = True
 
         self.indcohesion = False
+        self.indcohesion_state_1 = True
+        self.indcohesion_state_2 = True
+
         self.indalineation = False
 
         self.with_debug = False # Show Extra Information
@@ -62,7 +66,10 @@ class Agent(object):
 
     def set_substate_default(self): # Return to normal
         self.indseparate_state_1 = True
-        self.indseparate_state_2 = False
+        self.indseparate_state_2 = True
+
+        self.indcohesion_state_1 = True
+        self.indcohesion_state_2 = True
 
 
     def seek(self, target):
@@ -72,7 +79,7 @@ class Agent(object):
         return seekforce
 
     def arrive(self, target):
-        slowing_distance = 750.0
+        slowing_distance = 750.0 # Distancia de aterrizaje
         displacement = target - self.pos
         distance = math.sqrt( math.pow(displacement.getx(), 2) + math.pow(displacement.gety(), 2) ) # 500 minimun distance
         ramped_speed = self.max_velocity * (distance / slowing_distance)
@@ -103,19 +110,63 @@ class Agent(object):
         return self.arrive(target)
 
     def separate(self, target, extern_targets, id):                                          # Separate Behavior
-        displacement = target - self.pos
-        force = displacement.direction * self.max_velocity
-        seekforce = force - self.velocity
-        return seekforce
+        extern_targets.pop(self.my_id)
+        velocity_to_new_substate = 10.0
+
+        #print("FLAG")
+        if self.indseparate_state_1:
+            if self.velocity.get_mag() < velocity_to_new_substate:
+                self.indseparate_state_1 = False
+            return self.stop(self.pos)
+
+        elif self.indseparate_state_2: # Working only with objects differents than zero id0.
+            midterm_displacement = Vec2(0, 0)
+            midterm_distance = 0
+            minimun_distance_objects = 400      # Distancia mínima entre los objetos para detenerse
+
+            for target in extern_targets:
+                midterm_displacement = midterm_displacement + (target - self.pos)
+                midterm_distance = midterm_distance + (target - self.pos).get_mag()
+
+            midterm_displacement = midterm_displacement / len(extern_targets)
+            midterm_distance = midterm_distance /  len(extern_targets)
+
+            displacement = midterm_displacement
+            if (midterm_distance > minimun_distance_objects):
+                force = displacement.direction * midterm_distance
+            else:
+                force = displacement.direction * midterm_distance * -1
+            cohesionforce = force# - self.velocity
+            return cohesionforce
+        else:
+            return self.stop(self.pos)
 
     def cohesion(self, target, extern_targets, id):                                          # Cohesion Behavior
-        velocity_to_new_substate = 30.0
-        distance_to_new_substate = 50
-        if self.indseparate_state_1:
-            if ((self.pos - self.neighbors_pos[0]).get_mag() < distance_to_new_substate) and (self.velocity.get_mag() < velocity_to_new_substate):
-                if self.my_id != 0:
-                    self.indseparate_state_1 = False
-            return self.arrive(self.neighbors_pos[0])
+        extern_targets.pop(self.my_id)
+        velocity_to_new_substate = 10.0
+
+        #print("FLAG")
+        if self.indcohesion_state_1:
+            if self.velocity.get_mag() < velocity_to_new_substate:
+                self.indcohesion_state_1 = False
+            return self.stop(self.pos)
+
+        elif self.indcohesion_state_2: # Working only with objects differents than zero id0.
+            midterm_displacement = Vec2(0, 0)
+            midterm_distance = 0
+            minimun_distance_objects = 400      # Distancia mínima entre los objetos para detenerse
+
+            for target in extern_targets:
+                midterm_displacement = midterm_displacement + (target - self.pos)
+                midterm_distance = midterm_distance + (target - self.pos).get_mag()
+
+            midterm_displacement = midterm_displacement / len(extern_targets)
+            midterm_distance = midterm_distance /  len(extern_targets)
+
+            displacement = midterm_displacement
+            force = displacement.direction * self.max_velocity
+            cohesionforce = force# - self.velocity
+            return cohesionforce
         else:
             return self.stop(self.pos)
 
@@ -187,6 +238,7 @@ class Agent(object):
 
 
     def update(self, deltatime):
+
         # Agent States
         if self.indseek is True:
             self.force = self.seek(self.targetpos)
@@ -199,9 +251,9 @@ class Agent(object):
         elif self.indstop is True:
             self.force = self.stop(self.pos)
         elif self.indseparate is True:
-            self.force = self.separate(self.targetpos, self.neighbors_pos, self.my_id)
+            self.force = self.separate(self.targetpos, self.neighbors_pos.copy(), self.my_id)
         elif self.indcohesion is True:
-            self.force = self.cohesion(self.targetpos, self.neighbors_pos, self.my_id)
+            self.force = self.cohesion(self.targetpos, self.neighbors_pos.copy(), self.my_id)
         elif self.indalineation is True:
             self.force = self.alineation(self.targetpos)
         elif self.indseek is False or self.indflee is False or self.indwander is False or self.indarrive is False or self.indstop is False or self.indseparate is False or self.indcohesion is False or self.indalineation is False:

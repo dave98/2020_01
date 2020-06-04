@@ -15,7 +15,7 @@
         android:id="@+id/logo_image"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:transitionName="t_logo_image"
+        android:transitionName="t_logo_image"   
         android:src="@drawable/kitten_cat_avatar_35_512"/>
     
     <TextView

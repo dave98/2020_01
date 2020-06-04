@@ -63,6 +63,11 @@ class Vector2(object):
         """Multiply vector to vector."""
         return Vector2(self.xpos * other, self.ypos * other)
 
+    def __truediv__(self, other):
+        """Divide vector to vector. Other must be different than zero""" 
+        return Vector2(self.xpos / other, self.ypos / other)
+
+
     @property
     def direction(self):
         """Direction."""
