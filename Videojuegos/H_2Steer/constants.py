@@ -12,7 +12,8 @@ BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 CLOCK = pygame.time.Clock()
-SCREEN = pygame.display.set_mode((1300, 700), pygame.FULLSCREEN)
+#SCREEN = pygame.display.set_mode((1300, 700), pygame.FULLSCREEN)
+SCREEN = pygame.display.set_mode((1300, 700))
 
 if __name__ == "__main__":
     import main as Main
