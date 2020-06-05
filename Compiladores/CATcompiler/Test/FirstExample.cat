@@ -1,0 +1,19 @@
+
+$Conversion Farenheit - Celsius$
+
+principal() -> retorna 0:
+  variable farenheit, celsius
+  variable inferior, superior, salto
+
+  inferior = 0
+  superior = 300
+  salto = 20
+
+  farenheit = inferior
+
+  mientras(farenheit <= superior) entonces:
+    celsius = 5 * (farenheit - 32) / 9
+    mostrar(farenheit, '-', celsius)
+    farenheit = farenheit + salto
+
+  retorna
