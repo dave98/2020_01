@@ -1,0 +1,5 @@
+Delete some flags from C++ compiler in Atom:
+
+soil/SOIL.lib -lFreeImage -lglu32 -lopengl32 ../imported_biblios/glut32.lib -IC:\SFML\include -LC:\SFML\lib -lsfml-graphics -lsfml-window -lsfml-system
+
+Add them to compile projects from previous semester
