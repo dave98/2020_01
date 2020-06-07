@@ -4,7 +4,7 @@
 using namespace std;
 
 int main(){
-  CATlexical lexical_analizer();
-  //cout<<lexical_analizer.inner_message<<endl;
+  CATlexical lexical_analizer;
+
   return 0;
 }
