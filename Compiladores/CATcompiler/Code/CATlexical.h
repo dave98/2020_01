@@ -13,6 +13,7 @@ using namespace std;
 class CATlexical{
 public:
   string route_actual_doc;
+  ifstream reader_file;
   lexical_buffer in_buffer;
 
   CATlexical();
@@ -37,7 +38,7 @@ void CATlexical::set_doc_to_read(string new_route){
 
 
 void CATlexical::reader(){
-  
+
 }
 
 void CATlexical::print(){
