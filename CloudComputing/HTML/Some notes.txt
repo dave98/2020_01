@@ -1,0 +1,4 @@
+Apache Server commands:
+  sudo service apache2 start
+  sudo service apache2 restart
+  sudo service apache2 stop

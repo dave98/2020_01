@@ -4,15 +4,7 @@ GRAMMAR READER
 @author: DAVE
 """
 
-"""   --> Entrada <-- Diseñar código capaz de procesar una gramática (Procesarla, no entenderla)
-E  := T Ep
-Ep := + T Ep
-Ep := - T Ep
-Ep := lambda
-T  := F Tp
-Tp := * F Tp  |  /  F Tp  | lambda
-F  := ( E ) | num | id
-"""
+import os
 
 class CATsintatic_table:
     def __init__(self):
@@ -322,7 +314,7 @@ class CATgrammar:
                 print("\t Cadena invalida")
 
 
- 
+
     def print_dictionary(self):
         print("DICTIONARY")
         print(self.productions.grammar_dictionary)
@@ -331,6 +323,54 @@ class CATgrammar:
         print("Gramatica Bruta: ")
         for gram in self.raw_grammar:
             print(gram)
+
+    def create_class_nonal_interpreter(self, sign_to_interpret):
+        switcher = {
+            "*": "multiplicacion",
+            "/": "division",
+            "+": "suma",
+            "-": "menos",
+            "(": "parentesis_derecho",
+            ")": "parentesis_izquierdo"
+        }
+        return switcher.get(sign_to_interpret, "unknow_alpha")
+
+    def create_classes_carpet(self):
+        print("CAT:/Creando directorio de carpetas.")
+        path = "classes"
+        try:
+            os.mkdir(path)
+        except:
+            pass
+        else:
+            print("\tCreación de directorio completo")
+
+
+        for non_terminal in self.non_terminals:
+            if not non_terminal.isalnum():
+                non_terminal = self.create_class_nonal_interpreter(non_terminal)
+
+            print("\tRedactando: " + non_terminal)
+            file = open(path + "/" + non_terminal + ".py", "w+")
+            file.write("# Non terminal class\n")
+            file.write("class " + non_terminal + "(AbstractExpressionNT):\n")
+            file.write("\t#diccionario<" + non_terminal + ", Objeto>\n")
+            file.write("\tdef interprets(val1, val2, val3):\n")
+            file.write("\t\treturn (0, 0, 0)\n")
+            file.close()
+
+        for terminal in self.terminals:
+            if not terminal.isalnum():
+                terminal = self.create_class_nonal_interpreter(terminal)
+            print("\tRedactando: " + terminal)
+            file = open(path + "/" + terminal + ".py", "w+")
+            file.write("# Terminal class\n")
+            file.write("class " + terminal + "(AbstractExpressionT):\n")
+            file.write("\t#valor\n")
+            file.write("\tdef interprets():\n")
+            file.write("\t\treturn valor\n")
+            file.close()
+
 
     def __str__(self):
         print("CAT:/ Mostrando...")
@@ -364,11 +404,13 @@ F  := ( E ) | num | id
 """
 my_grammar = CATgrammar()
 my_grammar.reader()           # Just type or paste the grammar
-my_grammar.process_grammar(); #  IN DEFAULT: process_grammar(component_separator=":=", right_component_separator="|")
+my_grammar.process_grammar()  #  IN DEFAULT: process_grammar(component_separator=":=", right_component_separator="|")
                               #  Set according grammar separators
 print(my_grammar)
-print(my_grammar.get_siguientes("F")) # +++++ NUEVO GET_SIGUIENTE +++++++
-my_grammar.fill_dictionary()  # Funcion para llenar diccionario
+my_grammar.create_classes_carpet() # Crea directorio de classes .py en funcion a terminales y no terminales
+                                   # Revisar ln 338
+#print(my_grammar.get_siguientes("F")) # +++++ NUEVO GET_SIGUIENTE +++++++
+#my_grammar.fill_dictionary()  # Funcion para llenar diccionario
 
 """ Cadenas a validar
 num + num + num + num
@@ -376,5 +418,5 @@ num + num + num + num
 ( num * ) num
 num * ( num * num )
 """
-my_grammar.chain_validation() # Just type or paste the chain for validation
+#my_grammar.chain_validation() # Just type or paste the chain for validation
 #my_grammar.chain_validation(debug=True) # Ver el proceso de validacion
