@@ -27,9 +27,11 @@ public:
 
   vector<lexical_lexema*> lexema_for_sintactic;
   unordered_map<string, function<void()> > reserved_words;
+  unordered_map<string, function<void()> > operators;
 
   CATlexical();
-      void initialize_dictionary();
+      void initialize_reserved_words();
+      void initialize_operators();
   ~CATlexical();
 
   void set_doc_to_read(string);  // Setea el documento a leer actualmente
@@ -51,6 +53,18 @@ public:
         void funcion();
         void retorna();
         void variable();
+
+        void suma();
+        void resta();
+        void multiplicacion();
+        void division();
+        void asignacion();
+        void relacional();
+
+        void parentesis();
+        void corchetes();
+        void conma();
+
   void print();                  // Información del objeto
 
 };
@@ -61,10 +75,10 @@ CATlexical::CATlexical(){
   this->lexema_for_sintactic = vector<lexical_lexema*>(0, NULL);
   this->re_word = regex("[a-zA-Z]+");
   this->re_number = regex("[0-9]*.[0-9]+");
-  this->initialize_dictionary();
+  this->initialize_reserved_words();
 }
 
-void CATlexical::initialize_dictionary(){
+void CATlexical::initialize_reserved_words(){
   this->reserved_words["si"] =        bind(&CATlexical::si, this);
   this->reserved_words["sino"] =      bind(&CATlexical::sino, this);
   this->reserved_words["mientras"] =  bind(&CATlexical::mientras, this);
@@ -76,6 +90,16 @@ void CATlexical::initialize_dictionary(){
   this->reserved_words["funcion"] =   bind(&CATlexical::funcion, this);
   this->reserved_words["retorna"] =   bind(&CATlexical::retorna, this);
   this->reserved_words["variable"] =  bind(&CATlexical::variable, this);
+}
+
+void CATlexical::initialize_operators(){
+  this->operators["+"] =              bind(&CATlexical::suma, this);
+  this->operators["-"] =              bind(&CATlexical::resta, this);
+  this->operators["*"] =              bind(&CATlexical::multiplicacion, this);
+  this->operators["/"] =              bind(&CATlexical::division, this);
+  this->operators["="] =              bind(&CATlexical::asignacion, this);
+  this->operators["<"] =              bind(&CATlexical::relacional, this);
+  this->operators[">"] =              bind(&CATlexical::relacional, this);
 }
 
 
@@ -130,7 +154,6 @@ string CATlexical::reader_helper(){
 // Procesamiento será realizado línea por linea
 void CATlexical::process_line(int line_id){
   int scope_in_line = this->in_buffer->get_scope();
-
   cout<<line_id<<": ";
 
   if(scope_in_line == -1){ // Linea vacía
@@ -139,7 +162,6 @@ void CATlexical::process_line(int line_id){
   }
   // At this point we know there is something in the line
   this->process_words();
-
 }
 
 void CATlexical::process_words(){
@@ -156,57 +178,71 @@ void CATlexical::process_words(){
   unordered_map<string, function<void()>>::iterator it = this->reserved_words.find(in_word);
   if(it != this->reserved_words.end()){
     this->reserved_words[in_word]();
+    return;
   }
   else if(this->words(in_word)){
-    cout<<"Creando identificador: "<<in_word<<endl;
+    lexical_lexema* new_lexema = new lexical_lexema("IDENTIFICADOR", in_word);
+    cout<<*new_lexema<<endl;
+    return;
   }
   else{
-    cout<<"Verificando nuevos tipos"<<endl;
+    return;
   }
 }
 
 void CATlexical::si(){
-  cout<<"Creando token si"<<endl;
+  lexical_lexema* new_lexema = new lexical_lexema("SI");
+  cout<<*new_lexema<<endl;
 }
 
 void CATlexical::sino(){
-  cout<<"Creando token sino"<<endl;
+  lexical_lexema* new_lexema = new lexical_lexema("SINO");
+  cout<<*new_lexema<<endl;
 }
 
 void CATlexical::mientras(){
-  cout<<"Creando token mientras"<<endl;
+  lexical_lexema* new_lexema = new lexical_lexema("MIENTRAS");
+  cout<<*new_lexema<<endl;
 }
 
 void CATlexical::para(){
-  cout<<"Creando token para"<<endl;
+  lexical_lexema* new_lexema = new lexical_lexema("PARA");
+  cout<<*new_lexema<<endl;
 }
 
 void CATlexical::entonces(){
-  cout<<"Creando token entonces"<<endl;
+  lexical_lexema* new_lexema = new lexical_lexema("ENTONCES");
+  cout<<*new_lexema<<endl;
 }
 
 void CATlexical::yy(){
-  cout<<"Creando token yy"<<endl;
+  lexical_lexema* new_lexema = new lexical_lexema("YY");
+  cout<<*new_lexema<<endl;
 }
 
 void CATlexical::oo(){
-  cout<<"Creando token oo"<<endl;
+  lexical_lexema* new_lexema = new lexical_lexema("OO");
+  cout<<*new_lexema<<endl;
 }
 
 void CATlexical::principal(){
-  cout<<"Creando token principal"<<endl;
+  lexical_lexema* new_lexema = new lexical_lexema("PRINCIPAL");
+  cout<<*new_lexema<<endl;
 }
 
 void CATlexical::funcion(){
-  cout<<"Creando token funcion"<<endl;
+  lexical_lexema* new_lexema = new lexical_lexema("FUNCION");
+  cout<<*new_lexema<<endl;
 }
 
 void CATlexical::retorna(){
-  cout<<"Creando token retorna"<<endl;
+  lexical_lexema* new_lexema = new lexical_lexema("RETORNA");
+  cout<<*new_lexema<<endl;
 }
 
 void CATlexical::variable(){
-  cout<<"Creando token variable"<<endl;
+  lexical_lexema* new_lexema = new lexical_lexema("VARIABLE");
+  cout<<*new_lexema<<endl;
 }
 
 void CATlexical::process_numbers(){
