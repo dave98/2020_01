@@ -1,32 +1,50 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <regex>
 
 using namespace std;
 
-void print(vector<char>&);
+void print(vector<int>&);
+void fill_vector(vector<int>&, int);
 
 int main(){
-  string s_a = "haruki  murakami";
-  string s_b = "hiraku  makimura";
-  vector<char> a = vector<char>(0, ' ');
-  a = vector<char>(s_a.begin(), s_a.end());
-  a = vector<char>(s_b.begin(), s_b.end());
-
-  //cout<<s_a<<endl;
+  vector<int> a;
+  fill_vector(a, 20);
   //print(a);
-  bool gh = true;
-  cout<<"gh: "<<!!gh<<endl;
-
+/*
+  string identifier = ".0";
+  regex re("[0-9]*.[0-9]+");
+  if(regex_match(identifier, re)){
+    cout<<"Si es valido"<<endl;
+  }
+  else{
+    cout<<"No es valido"<<endl;
+  }
+*/
+  char c_a = 'a';
+  string s_a = "";
+  s_a += c_a;
   return 0;
 }
 
-void print(vector<char>& input){
+
+
+
+
+
+
+
+void fill_vector(vector<int>& in_vec, int n){
+  for(int i = 0; i < n; i++){
+    in_vec.push_back(i);
+  }
+  return;
+}
+
+
+void print(vector<int>& input){
   for(unsigned int i = 0; i < input.size(); i++){
-    if(input[i] == '\t')
-      cout<<i<<": tab"<<endl;
-    else{
-      cout<<i<<": "<<input[i]<<endl;
-    }
+    cout<<i<<": "<<input[i]<<endl;
   }
 }
