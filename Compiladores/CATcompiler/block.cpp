@@ -12,22 +12,32 @@ int main(){
   vector<int> a;
   fill_vector(a, 20);
   //print(a);
-/*
-  string identifier = ".0";
-  regex re("[0-9]*.[0-9]+");
+
+  string identifier = "0";
+
+  regex re("[0-9][0-9]*(\\.[0-9]+)?");
   if(regex_match(identifier, re)){
     cout<<"Si es valido"<<endl;
   }
   else{
     cout<<"No es valido"<<endl;
   }
-*/
-  char c_a = 'a';
-  string s_a = "";
-  s_a += c_a;
-  return 0;
-}
 
+/*
+  char c_a = 'c';
+  switch (c_a) {
+    case 'a':
+      cout<<"primero"<<endl;
+      break;
+    case 'b':
+      cout<<"segundo"<<endl;
+      break;
+    default:
+      cout<<"Nothing to see"<<endl;
+      break;
+  }
+  */
+}
 
 
 

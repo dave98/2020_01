@@ -9,6 +9,8 @@
 #include <regex>
 #include <functional>
 
+#include <windows.h>  /*WARNING*/
+
 #include "lexical_buffer.h"
 #include "lexical_lexema.h"
 
@@ -29,6 +31,9 @@ public:
   unordered_map<string, function<void()> > reserved_words;
   unordered_map<string, function<void()> > operators;
 
+  bool lexical_state;
+  string error_type;
+
   CATlexical();
       void initialize_reserved_words();
       void initialize_operators();
@@ -40,8 +45,9 @@ public:
     void process_line(int = 0);         // Procesa la línea de codigo en el buffer_actual
       void process_words();
       void process_numbers();
-      bool words(string);
-      bool numbers(string);
+      void process_operator();
+      bool is_word(string);
+      bool is_number(string);
         void si(); // Tratamiento para if
         void sino();
         void mientras();
@@ -61,10 +67,12 @@ public:
         void asignacion();
         void relacional();
 
-        void parentesis();
-        void corchetes();
-        void conma();
-
+        void empty();
+        void comentario();
+        void puntuacion();
+  bool continue_evaluation();
+  void set_error(string);
+  void report_error();
   void print();                  // Información del objeto
 
 };
@@ -74,8 +82,11 @@ CATlexical::CATlexical(){
   this->in_buffer = new lexical_buffer();
   this->lexema_for_sintactic = vector<lexical_lexema*>(0, NULL);
   this->re_word = regex("[a-zA-Z]+");
-  this->re_number = regex("[0-9]*.[0-9]+");
+  this->re_number = regex("[0-9][0-9]*(\\.[0-9]+)?");
+  this->lexical_state = true;
+  this->error_type = "";
   this->initialize_reserved_words();
+  this->initialize_operators();
 }
 
 void CATlexical::initialize_reserved_words(){
@@ -92,6 +103,7 @@ void CATlexical::initialize_reserved_words(){
   this->reserved_words["variable"] =  bind(&CATlexical::variable, this);
 }
 
+// BNFA  structure
 void CATlexical::initialize_operators(){
   this->operators["+"] =              bind(&CATlexical::suma, this);
   this->operators["-"] =              bind(&CATlexical::resta, this);
@@ -100,6 +112,16 @@ void CATlexical::initialize_operators(){
   this->operators["="] =              bind(&CATlexical::asignacion, this);
   this->operators["<"] =              bind(&CATlexical::relacional, this);
   this->operators[">"] =              bind(&CATlexical::relacional, this);
+
+  this->operators["$"] =              bind(&CATlexical::comentario, this);
+  this->operators[" "] =              bind(&CATlexical::empty, this);
+  this->operators["("] =              bind(&CATlexical::puntuacion, this);
+  this->operators[")"] =              bind(&CATlexical::puntuacion, this);
+  this->operators["["] =              bind(&CATlexical::puntuacion, this);
+  this->operators["]"] =              bind(&CATlexical::puntuacion, this);
+  this->operators[","] =              bind(&CATlexical::puntuacion, this);
+  this->operators[":"] =              bind(&CATlexical::puntuacion, this);
+
 }
 
 
@@ -127,9 +149,6 @@ void CATlexical::reader(){
       if (current_statement != "eof"){
         this->in_buffer->fill_buffer(current_statement);
         this->process_line(actual_line);
-        //cout<<i<<": "<<this->in_buffer->get_actual_buffer_size()<<" ";
-        //cout<<i<<": "<<this->in_buffer->get_scope()<<" ";
-        //this->in_buffer->print_actual_buffer();
         actual_line++;
       }
       else{
@@ -137,6 +156,8 @@ void CATlexical::reader(){
       }
     }
   }
+
+  cout<<endl<<"Lectura Satisfactoria"<<endl;
 }
 
 // Funciona en base al apuntador ifstream: this->file_reader
@@ -154,33 +175,42 @@ string CATlexical::reader_helper(){
 // Procesamiento será realizado línea por linea
 void CATlexical::process_line(int line_id){
   int scope_in_line = this->in_buffer->get_scope();
-  cout<<line_id<<": ";
+  //cout<<"Scope: "<<scope_in_line<<endl;
 
   if(scope_in_line == -1){ // Linea vacía
-    cout<<"EMPTY"<<endl;
     return;
   }
-  // At this point we know there is something in the line
-  this->process_words();
+
+  // At this point we know there is something in the line. El get_next will always be the fisrt character un expresion
+
+  while(this->continue_evaluation() && this->in_buffer->get_next_no_change() != '@'){
+    this->process_words();
+    this->process_numbers();
+    this->process_operator();
+    cout<<endl;
+
+    Sleep(3000);
+  }
+  return;
 }
 
 void CATlexical::process_words(){
   string in_word = "";
+  cout<<"Process words: "<<"|"<<this->in_buffer->get_next_no_change()<<"|"<<endl;
+
   in_word += this->in_buffer->get_next();
-  while(this->words(in_word)){
+  while(this->is_word(in_word)){
     in_word += this->in_buffer->get_next();
   }
   this->in_buffer->go_back();
   in_word.pop_back();
 
-  cout<<"Palabra captada: "<<in_word<<"|"<<endl;
-  cout<<"Next in: "<<this->in_buffer->get_next()<<endl;
   unordered_map<string, function<void()>>::iterator it = this->reserved_words.find(in_word);
   if(it != this->reserved_words.end()){
     this->reserved_words[in_word]();
     return;
   }
-  else if(this->words(in_word)){
+  else if(this->is_word(in_word)){
     lexical_lexema* new_lexema = new lexical_lexema("IDENTIFICADOR", in_word);
     cout<<*new_lexema<<endl;
     return;
@@ -190,6 +220,238 @@ void CATlexical::process_words(){
   }
 }
 
+void CATlexical::process_numbers(){
+  string in_number = "";
+  cout<<"Process number: "<<"|"<<this->in_buffer->get_next_no_change()<<"|"<<endl;
+
+  in_number += this->in_buffer->get_next();
+  while(this->is_number(in_number)){
+    in_number += this->in_buffer->get_next();
+  }
+  this->in_buffer->go_back();
+  in_number.pop_back();
+
+  if(this->is_number(in_number)){
+    lexical_lexema* new_lexema = new lexical_lexema("NUMBER", in_number);
+    cout<<*new_lexema<<endl;
+    return;
+  }
+  else{
+    return;
+  }
+}
+
+void CATlexical::process_operator(){
+  string in_operator = "";
+  cout<<"Process operator: "<<"|"<<this->in_buffer->get_next_no_change()<<"|"<<endl;
+
+  in_operator += this->in_buffer->get_next();
+
+  unordered_map<string, function<void()>>::iterator it = this->operators.find(in_operator);
+  if(it != this->operators.end()){ // Existe un operador
+    this->operators[in_operator]();
+    return;
+  }
+  else{
+    this->in_buffer->go_back();
+    return;
+  }
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////OPERATORS AND PUNTUATION/////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+void CATlexical::suma(){
+  lexical_lexema*  new_lexema = NULL;
+  char continue_suma = this->in_buffer->get_next();
+  switch (continue_suma) {
+    case '=':
+      new_lexema = new lexical_lexema("ASIGNACION_ESPECIAL","+=");
+      cout<<*new_lexema<<endl;
+      break;
+
+    default:
+      new_lexema = new lexical_lexema("ADICION","+");
+      cout<<*new_lexema<<endl;
+      this->in_buffer->go_back();
+      break;
+  }
+}
+
+void CATlexical::resta(){
+  lexical_lexema*  new_lexema = NULL;
+  char continue_resta = this->in_buffer->get_next();
+  switch (continue_resta) {
+    case '=':
+      new_lexema = new lexical_lexema("ASIGNACION_ESPECIAL","-=");
+      cout<<*new_lexema<<endl;
+      break;
+    case '>':
+      new_lexema = new lexical_lexema("ARROW","->");
+      cout<<*new_lexema<<endl;
+      break;
+
+    default:
+      new_lexema = new lexical_lexema("SUSTRACION","-");
+      cout<<*new_lexema<<endl;
+      this->in_buffer->go_back();
+      break;
+  }
+}
+
+void CATlexical::multiplicacion(){
+  lexical_lexema*  new_lexema = NULL;
+  char continue_multiplicacion = this->in_buffer->get_next();
+  switch (continue_multiplicacion) {
+    case '=':
+      new_lexema = new lexical_lexema("ASIGNACION_ESPECIAL","*=");
+      cout<<*new_lexema<<endl;
+      break;
+
+    default:
+      new_lexema = new lexical_lexema("MULTIPLICACION","*");
+      cout<<*new_lexema<<endl;
+      this->in_buffer->go_back();
+      break;
+  }
+}
+
+void CATlexical::division(){
+  lexical_lexema*  new_lexema = NULL;
+  char continue_division = this->in_buffer->get_next();
+  switch (continue_division) {
+    case '=':
+      new_lexema = new lexical_lexema("ASIGNACION_ESPECIAL","/=");
+      cout<<*new_lexema<<endl;
+      break;
+
+    default:
+      new_lexema = new lexical_lexema("DIVISION","/");
+      cout<<*new_lexema<<endl;
+      this->in_buffer->go_back();
+      break;
+  }
+}
+
+void CATlexical::asignacion(){
+  lexical_lexema*  new_lexema = NULL;
+  char continue_asignacion = this->in_buffer->get_next();
+  switch (continue_asignacion) {
+    case '=':
+      new_lexema = new lexical_lexema("COMPARACION","==");
+      cout<<*new_lexema<<endl;
+      break;
+
+    default:
+      new_lexema = new lexical_lexema("ASIGNACION","=");
+      cout<<*new_lexema<<endl;
+      this->in_buffer->go_back();
+      break;
+  }
+}
+
+void CATlexical::relacional(){
+  lexical_lexema*  new_lexema = NULL;
+  char evaluate_relacional = this->in_buffer->get_actual(); /*WARNING Impredictable behavior*/
+  switch (evaluate_relacional) {
+    case '<':
+      evaluate_relacional = this->in_buffer->get_next_no_change();
+      switch (evaluate_relacional) {
+        case '=':
+          new_lexema = new lexical_lexema("COMPARACION","<=");
+          cout<<*new_lexema<<endl;
+          this->in_buffer->get_next();
+          break;
+        default:
+          new_lexema = new lexical_lexema("COMPARACION","<");
+          cout<<*new_lexema<<endl;
+          break;
+      }
+      break;
+    case '>':
+      evaluate_relacional = this->in_buffer->get_next_no_change();
+      switch (evaluate_relacional) {
+        case '=':
+          new_lexema = new lexical_lexema("COMPARACION", ">=");
+          cout<<*new_lexema<<endl;
+          this->in_buffer->get_next();
+          break;
+        default:
+          new_lexema = new lexical_lexema("COMPARACION", ">");
+          cout<<*new_lexema<<endl;
+          break;
+      }
+      break;
+    default:
+      return;
+  }
+}
+
+void CATlexical::puntuacion(){
+  lexical_lexema* new_lexema = NULL;
+  char evaluate_puntuation = this->in_buffer->get_actual();
+  switch (evaluate_puntuation) {
+    case '(':
+      new_lexema = new lexical_lexema("PUNTUACION", "(");
+      cout<<*new_lexema<<endl;
+      break;
+    case ')':
+      new_lexema = new lexical_lexema("PUNTUACION", ")");
+      cout<<*new_lexema<<endl;
+      break;
+    case '[':
+      new_lexema = new lexical_lexema("PUNTUACION", "[");
+      cout<<*new_lexema<<endl;
+      break;
+    case ']':
+      new_lexema = new lexical_lexema("PUNTUACION", "]");
+      cout<<*new_lexema<<endl;
+      break;
+    case ',':
+      new_lexema = new lexical_lexema("PUNTUACION", ",");
+      cout<<*new_lexema<<endl;
+      break;
+    case ':':
+      new_lexema = new lexical_lexema("PUNTUACION", ":");
+      cout<<*new_lexema<<endl;
+      break;
+    default:
+    return;
+  }
+
+}
+
+
+void CATlexical::comentario(){
+  string comentario_deleted = "";
+
+  char beetwen_comentario = this->in_buffer->get_next();
+  comentario_deleted += beetwen_comentario;
+
+  while(beetwen_comentario != '$'){
+    beetwen_comentario = this->in_buffer->get_next();
+    comentario_deleted += beetwen_comentario;
+
+    if(beetwen_comentario == '@'){
+      this->set_error("Comentario Inconcluso");
+      return;
+    }
+  }
+
+  cout<<"Comentario: "<<comentario_deleted<<endl;
+  return;
+}
+
+void CATlexical::empty(){
+  while(this->in_buffer->get_next() == ' '){
+  }
+  this->in_buffer->go_back();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////RESERVED WORDS///////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
 void CATlexical::si(){
   lexical_lexema* new_lexema = new lexical_lexema("SI");
   cout<<*new_lexema<<endl;
@@ -245,12 +507,12 @@ void CATlexical::variable(){
   cout<<*new_lexema<<endl;
 }
 
-void CATlexical::process_numbers(){
-}
 
 
 
-bool CATlexical::words(string in_word){
+
+
+bool CATlexical::is_word(string in_word){
   if(regex_match(in_word, this->re_word)){
     return true;
   }
@@ -260,9 +522,8 @@ bool CATlexical::words(string in_word){
 }
 
 
-bool CATlexical::numbers(string in_word){
-  regex re("[0-9]*.[0-9]+");
-  if(regex_match(in_word, re)){
+bool CATlexical::is_number(string in_word){
+  if(regex_match(in_word, this->re_number)){
     return true;
   }
   else{
@@ -270,6 +531,21 @@ bool CATlexical::numbers(string in_word){
   }
 
 }
+
+
+bool CATlexical::continue_evaluation(){
+  return this->lexical_state;
+}
+
+void CATlexical::set_error(string _error = "Error desconocido"){
+  this->lexical_state = false;
+  this->error_type = _error;
+}
+
+void CATlexical::report_error(){
+  cout<<"\tError lexico en linea del tipo: "<<this->error_type<<endl;
+}
+
 
 void CATlexical::print(){
   cout<<"Codigo en: "<<this->route_actual_doc<<endl;

@@ -14,7 +14,7 @@ principal() -> retorna 0:
 
   mientras(farenheit <= superior) entonces:
     celsius = 5 * (farenheit - 32) / 9
-    mostrar(farenheit, '-', celsius)
+    mostrar(farenheit, celsius)
     farenheit = farenheit + salto
 
   retorna

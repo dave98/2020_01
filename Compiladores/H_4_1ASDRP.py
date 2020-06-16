@@ -407,10 +407,9 @@ my_grammar.reader()           # Just type or paste the grammar
 my_grammar.process_grammar()  #  IN DEFAULT: process_grammar(component_separator=":=", right_component_separator="|")
                               #  Set according grammar separators
 print(my_grammar)
-my_grammar.create_classes_carpet() # Crea directorio de classes .py en funcion a terminales y no terminales
-                                   # Revisar ln 338
+
 #print(my_grammar.get_siguientes("F")) # +++++ NUEVO GET_SIGUIENTE +++++++
-#my_grammar.fill_dictionary()  # Funcion para llenar diccionario
+my_grammar.fill_dictionary()  # Funcion para llenar diccionario
 
 """ Cadenas a validar
 num + num + num + num
@@ -418,5 +417,5 @@ num + num + num + num
 ( num * ) num
 num * ( num * num )
 """
-#my_grammar.chain_validation() # Just type or paste the chain for validation
+my_grammar.chain_validation() # Just type or paste the chain for validation
 #my_grammar.chain_validation(debug=True) # Ver el proceso de validacion

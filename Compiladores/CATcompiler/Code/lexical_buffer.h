@@ -21,11 +21,13 @@ public:
   ~lexical_buffer();
 
   void fill_buffer(string);
-    void change_buffer();
   int get_actual_buffer_size();
   int get_scope();
     char get_next();
+    char get_actual();
     char get_next_no_change();
+    char get_back_no_change();
+
     void go_back();
     void update_backward();
 
@@ -34,10 +36,10 @@ public:
 };
 
 lexical_buffer::lexical_buffer(){
-  this->main_buffer = vector<vector<char>>(2, vector<char>(0, ' '));
-  this->used_buffer = false;  // 0(false) left buffer, 1(true) right buffer
+  this->main_buffer = vector<vector<char>>(2, vector<char>(6, 'a'));
+  this->used_buffer = true;  // 0(false) left buffer, 1(true) right buffer
   this->lookahead_pointer = this->main_buffer[this->used_buffer].begin();
-  this->backward_pointer = this->main_buffer[this->used_buffer].begin();
+  this->backward_pointer  = this->main_buffer[this->used_buffer].begin();
 }
 
 lexical_buffer::~lexical_buffer(){
@@ -45,21 +47,21 @@ lexical_buffer::~lexical_buffer(){
 
 // Intercambio automático entre buffer izquierdo y buffer derecho
 void lexical_buffer::fill_buffer(string in_sentence){
-  this->main_buffer[this->used_buffer] = vector<char>(in_sentence.begin(), in_sentence.end());
-  this->change_buffer();
-}
-
-void lexical_buffer::change_buffer(){
   this->used_buffer = !this->used_buffer;
+  this->main_buffer[this->used_buffer] = vector<char>(in_sentence.begin(), in_sentence.end());
+  this->main_buffer[this->used_buffer].push_back('@');
   this->lookahead_pointer = this->main_buffer[this->used_buffer].begin();
-  this->backward_pointer = this->main_buffer[this->used_buffer].begin();
+  this->backward_pointer =  this->main_buffer[this->used_buffer].begin();
+
 }
 
 int lexical_buffer::get_actual_buffer_size(){
   return this->main_buffer[this->used_buffer].size();
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int lexical_buffer::get_scope(){
+
   if(!this->get_actual_buffer_size()){
     return -1;
   }
@@ -82,9 +84,15 @@ char lexical_buffer::get_next(){
     return *this->lookahead_pointer;
   }
   else{
+    //this->lookahead_pointer--; // Keep consistency in the end of the line  /*WARNING*/
     return '@';
   }
 }
+
+char lexical_buffer::get_actual(){ /*WARNING: Impredictable behavior*/
+  return *this->lookahead_pointer;
+}
+
 
 char lexical_buffer::get_next_no_change(){
   if(this->lookahead_pointer + 1 != this->main_buffer[this->used_buffer].end()){
@@ -95,17 +103,30 @@ char lexical_buffer::get_next_no_change(){
   }
 }
 
+char lexical_buffer::get_back_no_change(){
+  if(this->lookahead_pointer - 1 != this->main_buffer[this->used_buffer].begin()){
+    return *(this->lookahead_pointer - 1);
+  }
+  else{
+    return *(this->lookahead_pointer);
+  }
+
+}
+
 
 
 // Manda un paso para atras a lookahead_pointer si en caso no esta al inicio.
 void lexical_buffer::go_back(){
-  if(this->lookahead_pointer != this->main_buffer[this->used_buffer].begin()){
+  this->lookahead_pointer--;
+  return;
+  //cout<<*this->lookahead_pointer<<"<->"<<*this->main_buffer[this->used_buffer].begin()<<endl;
+  /*if(this->lookahead_pointer != this->main_buffer[this->used_buffer].begin()){
     this->lookahead_pointer--;
     return;
   }
   else{
     return;
-  }
+  }*/
 }
 
 // Put the backward pointer a the same position as the lookahead_pointer.
@@ -125,8 +146,9 @@ void lexical_buffer::print_one_buffer(int in_buff){
 }
 
 void lexical_buffer::print_actual_buffer(){
-  cout<<this->used_buffer<<" ";
+  cout<<this->used_buffer<<" |";
   print_vector(this->main_buffer[this->used_buffer]);
+  cout<<"|"<<endl;
   return;
 }
 
