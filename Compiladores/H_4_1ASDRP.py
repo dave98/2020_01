@@ -99,6 +99,9 @@ class CATproduction:
     def get_all_values(self):
         return list(self.grammar_dictionary.values())
 
+#Using in built pointer implementation (Diferente variables points to the same inmutable objetc)
+
+
 
 class CATgrammar:
     def __init__(self):
@@ -292,12 +295,14 @@ class CATgrammar:
                     print("Entrada: ", stack)
 
                 if (stack[len(stack)-1] == entry[0]):
+                    print("temp1_1", stack[len(stack)-1])
                     stack.pop() #Deleting last element
                     entry.pop(0)
                 else:
                     temp1 = stack.pop() # Getting and deleting last element
                     temp2 = entry[0]
                     x_val = self.my_table.get_from_keys(temp1, temp2).split()
+                    print("temp1", temp1, "xval", x_val)
                     x_val.reverse()
 
                     if x_val[0] == "ERROR":
@@ -371,7 +376,6 @@ class CATgrammar:
             file.write("\t\treturn valor\n")
             file.close()
 
-
     def __str__(self):
         print("CAT:/ Mostrando...")
 
@@ -407,7 +411,6 @@ my_grammar.reader()           # Just type or paste the grammar
 my_grammar.process_grammar()  #  IN DEFAULT: process_grammar(component_separator=":=", right_component_separator="|")
                               #  Set according grammar separators
 print(my_grammar)
-
 #print(my_grammar.get_siguientes("F")) # +++++ NUEVO GET_SIGUIENTE +++++++
 my_grammar.fill_dictionary()  # Funcion para llenar diccionario
 
@@ -416,6 +419,7 @@ num + num + num + num
 ( num + num ) + ( num + num )
 ( num * ) num
 num * ( num * num )
+num + ( num * num )
 """
 my_grammar.chain_validation() # Just type or paste the chain for validation
 #my_grammar.chain_validation(debug=True) # Ver el proceso de validacion
