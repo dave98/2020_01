@@ -100,6 +100,115 @@ class CATproduction:
         return list(self.grammar_dictionary.values())
 
 #Using in built pointer implementation (Diferente variables points to the same inmutable objetc)
+class CATNode:
+    def __init__(self, _etiqueta, _hijos, _padre):
+        self.etiqueta = _etiqueta
+        self.hijos = _hijos
+        self.padre = _padre
+        self.siguiente = 0
+        self.n_hijos = []
+
+    def add_child(self, new_child):
+        self.n_hijos.append(new_child)
+        self.siguiente+=1
+
+    def set_parent(self, new_parent):
+        self.padre = new_parent
+
+    def get_parent(self):
+        return self.padre
+
+class CATree:
+    def __init__(self):
+        self.root = None
+        self.actual_node = None
+        self.is_usable = True
+
+        self.dictio_visualizer = {}
+
+    def insert(self, _etiqueta, _hijos, debug = False):
+        if self.is_usable:
+            if debug: print(_etiqueta, ": ", end="")
+            if not self.root:
+                temp_node = CATNode(_etiqueta, _hijos, None)
+                self.root = temp_node
+                self.actual_node = temp_node
+                if debug: print("\t Creando Raiz")
+
+            else:
+                if self.down_to_first_child() == _etiqueta :                        # Evaluando primer hijo es equivalente a la etiqueta ingresante
+                    temp_node = CATNode(_etiqueta, _hijos, self.actual_node)        # Por lo general siempre es verdadero
+                    self.actual_node.add_child(temp_node)
+                    self.actual_node = temp_node
+                    if debug: print("\t Insercción normal -> Op 1")
+
+                else:                                                               # De no serlo es por que : No hay concordancia o no existe hijo a donde bajar
+                    self.actual_node = self.go_next(self.actual_node)
+                    if self.actual_node != None:
+                        #print("-->", self.actual_node.hijos, "-->", self.actual_node.siguiente)
+                        if self.actual_node.hijos[self.actual_node.siguiente] == _etiqueta:
+                            temp_node = CATNode(_etiqueta, _hijos, self.actual_node)
+                            self.actual_node.add_child(temp_node)
+                            self.actual_node = temp_node
+                            if debug: print("\t Insercción siguiente -> Op 2")
+                        else:
+                            self.is_usable = False
+                            if debug: print("\t Incongruencia de insercción")
+                    else:
+                        self.is_usable = False
+                        if debug: print("\t Root reached!!")
+
+                if self.is_usable and self.down_to_first_child() == "lambda":
+                    if debug: print("Lambda: \t Lambda in -> Op 3")
+                    self.insert_lambda()
+
+    ######### OPERACION 1 ACORDE A LA PROPUESTA DE LABORATARIO ############################
+    def down_to_first_child(self):
+        if len(self.actual_node.hijos) == 0:
+            return ""
+        else:
+            return self.actual_node.hijos[0]
+
+    ######### OPERACION 2 ACORDE A LA PROPUESTA DE LABORATARIO ############################
+    def go_next(self, current_node):                                            # First interaction is actual node. In recursivity it takes several temp nodes values until it reaches root node
+        if current_node.get_parent() != None:
+            temp_parent = current_node.get_parent()
+            if( temp_parent.siguiente < len(temp_parent.hijos) ):
+                return temp_parent
+            else:
+                return self.go_next(temp_parent)
+        else:
+            return None                                                         # Indica que hemos llegado a la raiz (por ende no tiene padre)
+
+    ######### OPERACION 3 ACORDE A LA PROPUESTA DE LABORATARIO ############################
+    def insert_lambda(self):
+        temp_node = CATNode("lambda", [], self.actual_node)
+        self.actual_node.add_child(temp_node)
+
+
+    #############  Tree tools (Ignore) #################
+    def draw_tree(self):
+        if not self.root:
+            print("\tERROR: Null root")
+            return
+
+        self.set_tree_tranversal(self.root, 0, debug = False)
+        for key in self.dictio_visualizer:
+            print(key, self.dictio_visualizer.get(key))
+
+    def add_to_dictio(self, _level, _etiqueta):
+        if not self.dictio_visualizer.get(_level):
+            self.dictio_visualizer[_level] = []
+        self.dictio_visualizer[_level].append(_etiqueta)
+
+    def set_tree_tranversal(self, start_from, order, debug = False):
+        if debug:
+            print(order, start_from.etiqueta, start_from.hijos)
+
+        self.add_to_dictio(order, "ROOT" + "->" + start_from.etiqueta if not start_from.padre else start_from.padre.etiqueta + "->" + start_from.etiqueta)
+        for node in start_from.n_hijos:
+            self.set_tree_tranversal(node, order+1, debug)
+        return
 
 
 
@@ -278,13 +387,14 @@ class CATgrammar:
             self.get_primeros(_no_terminal, verified=False, update_table=True) # El codigo de get primeros, mientras recorre puede actualizar la tabla semantica
         print(self.my_table)
 
-    def chain_validation(self, debug = False):
+    def chain_validation(self, debug = False, with_tree_at_end = False, with_tree_debug = False):
         raw_chain = self.reader(for_root = False)
 
         for chain in raw_chain: # Validando linea por linea
             print("Validando: ", chain)
             entry = chain.split()
             stack = ["$"]
+            internal_tree = CATree()
 
             stack.append(self.non_terminals[0]) # Push estadoInicial
             entry.append("$")
@@ -295,14 +405,14 @@ class CATgrammar:
                     print("Entrada: ", stack)
 
                 if (stack[len(stack)-1] == entry[0]):
-                    print("temp1_1", stack[len(stack)-1])
-                    stack.pop() #Deleting last element
+                    internal_tree.insert(stack[len(stack)-1], [], with_tree_debug)
+                    stack.pop()                                                         # Deleting last element
                     entry.pop(0)
                 else:
-                    temp1 = stack.pop() # Getting and deleting last element
+                    temp1 = stack.pop()                                                 # Getting and deleting last element
                     temp2 = entry[0]
                     x_val = self.my_table.get_from_keys(temp1, temp2).split()
-                    print("temp1", temp1, "xval", x_val)
+                    internal_tree.insert(temp1, x_val.copy(), with_tree_debug)          # Copy() to avoid inmutable objetcs
                     x_val.reverse()
 
                     if x_val[0] == "ERROR":
@@ -315,8 +425,18 @@ class CATgrammar:
 
             if(not stack and not entry):
                 print("\t Cadena aceptada")
+                if with_tree_at_end:
+                    print("\t Mostrando arbol")
+                    print()
+                    internal_tree.draw_tree()
+                    print()
+                    print()
             else:
                 print("\t Cadena invalida")
+                if with_tree_at_end:
+                    print("\t No hay arbol que mostrar")
+                    print()
+                    print()
 
 
 
@@ -421,5 +541,7 @@ num + num + num + num
 num * ( num * num )
 num + ( num * num )
 """
-my_grammar.chain_validation() # Just type or paste the chain for validation
-#my_grammar.chain_validation(debug=True) # Ver el proceso de validacion
+# Just type or paste the chain for validation
+#my_grammar.chain_validation()                                              # Proceso de validacion
+my_grammar.chain_validation(with_tree_at_end=True)                          # Proceso de validacion mostrando arbol al final (ln 395, 406, 413) -> Proceso de insercion en ln 129 (Incluye tres tipos de operaciones descritas en laboratiorio)
+#my_grammar.chain_validation(with_tree_at_end=True, with_tree_debug = True) # Proceso de validacion con arbol e operaciones solicitadas en laboratorio
