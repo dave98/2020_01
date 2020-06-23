@@ -1,0 +1,8 @@
+1. Si kubectl no se ha instalado aún en la CLI, ejecute el comando siguiente:
+az aks install-cli
+
+2. Ejecutar el comando siguiente para obtener las credenciales del clúster:
+az aks get-credentials --resource-group <KubernetesGroup> --name <Kubernetes3>
+
+3. Ejecutar el comando siguiente para abrir el panel de Kubernetes:
+az aks browse --resource-group <KubernetesGroup> --name <Kubernetes3>

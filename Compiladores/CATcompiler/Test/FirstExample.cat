@@ -3,13 +3,15 @@
 $Conversion Farenheit - Celsius$
 
 principal() -> retorna 0:
-  variable a = 10, b = 5, c = b
-  variable farenheit, celsius
-  variable inferior, superior, salto
+  variable a = 10;
+  variable b = 5,
+  variable c = b ;
+  variable farenheit, celsius ;
+  variable inferior, superior, salto ;
 
-  inferior = 0
-  superior = 300
-  salto = 20
+  inferior = 0 ;
+  superior = 300 ;
+  salto = 20 ;
 
   farenheit = inferior
 
@@ -19,3 +21,9 @@ principal() -> retorna 0:
     farenheit = farenheit + salto
 
   retorna
+
+  ARGLIST -> TPDEF Equal TEST _ARGLIST
+  ARGLIST -> TPDEF _ARGLIST
+  ARGLIST -> _ARGLIST
+  ARGLIST ->
+  _ARGLIST ->

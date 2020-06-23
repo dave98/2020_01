@@ -5,32 +5,36 @@ PRINCIPAL -> Prin PARAMETERS Arrow Return Atom DPoint
 PARAMETERS -> LPar RPar
 PARAMETERS -> LPar ARGLIST RPar
 
-"""
-ARGLIST -> TPDEF Equal TEST
-ARGLIST -> TPDEF
-ARGLIST ->
-ARGLIST -> ARGLIST Comma ARGLIST
-"""
+ARGLIST -> ARGEXPR
+ARGLIST -> ARGEXPR Comma ARGLIST
 
-ARGLIST -> TPDEF Equal TEST _ARGLIST
-ARGLIST -> TPDEF _ARGLIST
-ARGLIST -> _ARGLIST
-
-_ARGLIST ->
-
+ARGEXPR -> TPDEF
+ARGEXPR -> TPDEF Equal TEST
+ARGEXPR ->
 
 TPDEF -> Vari Iden
 TEST -> Atom
 
-STMT ->
-STMT -> SIMPLE_STMT STMT
-STMT -> COMPOUND_STMT STMT
+DEFDEF -> Iden Equal Atom
+DEFDEF -> Iden SEqual Atom
+DEFDEF -> Iden AAsig
+
+STMT -> SIMPLE_STMT SComma STMT
+STMT -> SIMPLE_STMT SComma
+STMT -> COMPOUND_STMT SComma STMT
+STMT -> COMPOUND_STMT SComma
 
 SIMPLE_STMT ->  STMTLIST
 
-STMTLIST -> TPDEF Equal TEST
+STMTLIST -> DEFDEF
 STMTLIST -> TPDEF
-STMTLIST -> STMTLIST Comma STMTLIST
+STMTLIST -> TPDEF TPDEF_SUB
+STMTLIST -> TPDEF Equal TEST
+STMTLIST -> TPDEF TPDEF_SUB Equal TEST
+
+
+TPDEF_SUB -> Comma Iden
+TPDEF_SUB -> Comma Iden TPDEF_SUB
 
 Prin -> 'principal'
 Arrow -> '>'
@@ -41,6 +45,13 @@ DPoint -> ':'
 LPar -> '('
 RPar -> ')'
 Equal -> '='
+SEqual -> '+='
+SEqual -> '-='
+SEqual -> '*='
+SEqual -> '/='
+AAsig -> '++'
+AAsig -> '--'
 Comma -> ','
+SComma -> ';'
 Vari -> 'variable'
 Iden -> 'identificador'
