@@ -15,7 +15,7 @@ from statistics import mean
 from collections import Counter
 
 class SnakeNN:
-    def __init__(self, initial_games = 100, test_games = 100, goal_steps = 200, lr = 1e-2, filename = 'snake_nn_2.tflearn'):
+    def __init__(self, initial_games = 250, test_games = 100, goal_steps = 200, lr = 1e-2, filename = 'snake_nn_2.tflearn'):
         self.initial_games = initial_games
         self.test_games = test_games
         self.goal_steps = goal_steps
@@ -136,15 +136,9 @@ class SnakeNN:
                    predictions.append(model.predict(self.add_action_to_observation(prev_observation, action).reshape(-1, 5, 1)))
                 action = np.argmax(np.array(predictions))
                 game_action = self.get_game_action(snake, action - 1)
-                done, score, snake, food  = game.step(game_action)
+                done, score, snake, food  = game.step(game_action) # Get some extra data
                 game_memory.append([prev_observation, action])
                 if done:
-                    print('-----')
-                    print(steps)
-                    print(snake)
-                    print(food)
-                    print(prev_observation)
-                    print(predictions)
                     break
                 else:
                     prev_observation = self.generate_observation(snake, food)
@@ -160,6 +154,7 @@ class SnakeNN:
         game = SnakeGame(gui = True)
         _, _, snake, food = game.start()
         prev_observation = self.generate_observation(snake, food)
+        self.goal_steps = 1000
         for _ in range(self.goal_steps):
             precictions = []
             for action in range(-1, 2):
@@ -174,13 +169,18 @@ class SnakeNN:
 
     def train(self):
         training_data = self.initial_population()
+        print(" ------------------------- Creación de población inicial completa ---------------------------------------")
         nn_model = self.model()
         nn_model = self.train_model(training_data, nn_model)
+        print(" --------------------------------- Entrenamiento completo ---------------------------------------------")
         self.test_model(nn_model)
+        print(" --------------------------------- Testing completo ---------------------------------------------")
 
     def visualise(self):
         nn_model = self.model()
         nn_model.load(self.filename)
+        print(" --------------------------------- Carga de modelo completa ---------------------------------------------")
+
         self.visualise_game(nn_model)
 
     def test(self):

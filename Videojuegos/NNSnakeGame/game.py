@@ -35,7 +35,7 @@ class SnakeGame:
         win = curses.newwin(self.board["width"] + 2, self.board["height"] + 2, 0, 0)
         curses.curs_set(0)
         win.nodelay(1)
-        win.timeout(200)
+        win.timeout(180)
         self.win = win
         self.render()
 
@@ -43,7 +43,7 @@ class SnakeGame:
         self.win.clear()
         self.win.border(0)
         self.win.addstr(0, 2, 'Score : ' + str(self.score) + ' ')
-        self.win.addch(self.food[0], self.food[1], 'x')
+        self.win.addch(self.food[0], self.food[1], '*')
         for i, point in enumerate(self.snake):
             if i == 0:
                 self.win.addch(point[0], point[1], '0')
@@ -106,5 +106,5 @@ class SnakeGame:
 if __name__ == "__main__":
     game = SnakeGame(gui = True)
     game.start()
-    for _ in range(100):
+    for _ in range(50):
         game.step(randint(0,3))

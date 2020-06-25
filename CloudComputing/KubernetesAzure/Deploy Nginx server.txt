@@ -19,7 +19,7 @@ spec:
         image: nginx:1.14.2
         ports:
         - containerPort: 80
-
+	
 
 1. Create a Deployment based on the YAML file:
 kubectl apply -f https://k8s.io/examples/application/deployment.yaml

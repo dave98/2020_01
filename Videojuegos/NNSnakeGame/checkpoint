@@ -1,2 +1,2 @@
-model_checkpoint_path: "D:\\Dave\\code\\2020_01\\Videojuegos\\NNSnakeGame\\snake_nn_2.tflearn"
-all_model_checkpoint_paths: "D:\\Dave\\code\\2020_01\\Videojuegos\\NNSnakeGame\\snake_nn_2.tflearn"
+model_checkpoint_path: "D:\\Dave\\code\\2020_01\\Videojuegos\\NNSnakeGame\\snake_nn.tflearn"
+all_model_checkpoint_paths: "D:\\Dave\\code\\2020_01\\Videojuegos\\NNSnakeGame\\snake_nn.tflearn"
