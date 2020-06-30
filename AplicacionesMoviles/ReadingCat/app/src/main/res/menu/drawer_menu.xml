@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--xmlns:tools="http://schemas.android.com/tools"-->
+    <!--tools:showIn="navigation_view"-->
+
+    <group android:checkableBehavior="single">
+        <item android:id="@+id/nav_all_books_and_docs"
+            android:icon="@drawable/ic_all_books_and_doc"
+            android:title="Libros y documentos"/>
+        <item android:id="@+id/nav_last_read"
+            android:icon="@drawable/ic_last_read"
+            android:title="Últimos leídos"/>
+        <item android:id="@+id/nav_to_read"
+            android:icon="@drawable/ic_to_read"
+            android:title="Nuevos"/>
+        <item android:id="@+id/nav_favorite"
+            android:icon="@drawable/ic_favorite"
+            android:title="Favoritos"/>
+        <item android:id="@+id/nav_book_collection"
+            android:icon="@drawable/ic_book_collection"
+            android:title="Colecciones"/>
+        <item android:id="@+id/nav_garbage"
+            android:icon="@drawable/ic_garbage"
+            android:title="En papelera"/>
+        <item android:id="@+id/nav_notifications"
+            android:icon="@drawable/ic_notifications"
+            android:title="Notificaciones"/>
+        <item android:id="@+id/nav_configuration"
+            android:icon="@drawable/ic_configuration"
+            android:title="Configuraciones"/>
+        <item android:id="@+id/nav_update"
+            android:icon="@drawable/ic_updates"
+            android:title="Actualizaciones"/>
+        <item android:id="@+id/nav_programmer"
+            android:icon="@drawable/ic_baseline_emoji_people_24"
+            android:title="Rincón del Programador"/>
+    </group>
+
+</menu>
