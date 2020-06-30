@@ -11,7 +11,6 @@ import android.widget.Button;
 public class Login extends AppCompatActivity {
     private Button mLoginButtom;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,6 +27,5 @@ public class Login extends AppCompatActivity {
                 finish();
             }
         });
-
     }
 }
