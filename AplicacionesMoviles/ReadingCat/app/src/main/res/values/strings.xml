@@ -6,4 +6,8 @@
     <string name="app_login_password">Password</string>
     <string name="app_login_forget_password">Forget Password?</string>
     <string name="app_login_login">Login</string>
+    <string name="navigation_drawer_open">Open navigator</string>
+    <string name="navigation_drawer_close">Close navigator</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

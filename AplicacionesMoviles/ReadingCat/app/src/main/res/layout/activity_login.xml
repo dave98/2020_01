@@ -93,7 +93,8 @@
             android:background="#000000"
             android:textColor="#ffffff"
             android:layout_marginTop="5dp"
-            android:layout_marginBottom="10dp"/>
+            android:layout_marginBottom="10dp"
+            android:id="@+id/login_buttom"/>
 
     </LinearLayout>
 

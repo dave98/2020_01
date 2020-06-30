@@ -14,14 +14,18 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
+
 public class SplashScreen extends AppCompatActivity {
 
     private static int SPLASH_SCREEN = 5000;
-
     //Variables
     Animation topAnim, bottomAnim;
     ImageView image;
     TextView logo, slogan;
+
+    private File storage;
+    private String[] allPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +45,14 @@ public class SplashScreen extends AppCompatActivity {
         image.setAnimation(topAnim);
         logo.setAnimation(bottomAnim);
         slogan.setAnimation(bottomAnim);
+
+        //Loading Data Taken From https://www.youtube.com/watch?v=TQg98mQL2hs
+        allPath = StorageUtil.getStorageDirectories(this);
+        for(String path : allPath){
+            storage = new File(path);
+            Method.load_Directory_Files(storage);
+        }
+
 
         //After SPLASH_SCREEN time, we go to the next activity
         //Transition animation taken from: https://www.youtube.com/watch?v=C_TEugAIMHA
