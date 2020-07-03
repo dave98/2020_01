@@ -1,0 +1,9 @@
+Parser top down - LL1 Descenso Recursivo
+parser bottom up - LR1 Precedenciad de Operadores
+
+¿Cuál es la disciplina de Marketing de La Insolencia? -> Estrategia del Marketing (estrechamente asociada con la marca).
+	Que cosa es la Insolencia
+
+Funcion del Marketing:
+	Acciones que ayudan 
+	Cosas físicas que hacen para apuntalar esa marca
