@@ -210,8 +210,6 @@ class CATree:
             self.set_tree_tranversal(node, order+1, debug)
         return
 
-
-
 class CATgrammar:
     def __init__(self):
         self.raw_grammar = []
@@ -533,6 +531,8 @@ my_grammar.process_grammar()  #  IN DEFAULT: process_grammar(component_separator
 print(my_grammar)
 #print(my_grammar.get_siguientes("F")) # +++++ NUEVO GET_SIGUIENTE +++++++
 my_grammar.fill_dictionary()  # Funcion para llenar diccionario
+#my_grammar.create_classes_carpet();
+
 
 """ Cadenas a validar
 num + num + num + num

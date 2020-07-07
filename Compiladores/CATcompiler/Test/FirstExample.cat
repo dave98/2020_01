@@ -3,11 +3,11 @@
 $Conversion Farenheit - Celsius$
 
 principal() -> retorna 0:
-  variable a = 10;
-  variable b = 5,
+  variable a = 10 ;
+  variable b = 5 ;
   variable c = b ;
-  variable farenheit, celsius ;
-  variable inferior, superior, salto ;
+  variable farenheit , celsius ;
+  variable inferior , superior , salto ;
 
   inferior = 0 ;
   superior = 300 ;
