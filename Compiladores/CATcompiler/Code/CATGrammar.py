@@ -23,10 +23,11 @@ DEFDEF -> Iden Equal TEST
 DEFDEF -> Iden SEqual Atom
 DEFDEF -> Iden AAsig
 
+STMT ->
 STMT -> SIMPLE_STMT SComma STMT
 STMT -> SIMPLE_STMT SComma
-STMT -> COMPOUND_STMT SComma STMT
-STMT -> COMPOUND_STMT SComma
+STMT -> COMPOUND_STMT STMT
+STMT -> COMPOUND_STMT
 
 SIMPLE_STMT ->  STMTLIST
 STMTLIST -> DEFDEF
@@ -38,13 +39,14 @@ COMPOUND_STMT -> IF_STMT
 COMPOUND_STMT -> WHILE_STMT
 COMPOUND_STMT -> FOR_STMT
 
-IF_STMT -> IF_COMPLETE
-IF_STMT -> IF_INCOMPLETE
+IF_STMT -> SI NAMED_EXPR ENTONCES DPoint STMT IF_STMT_2 IF_STMT_3
 
-IF_COMPLETE -> SI NAMED_EXPR ENTONCES DPoint IF_COMPLETE SINO ENTONCES DPoint IF_COMPLETE
-IF_COMPLETE -> SIMPLE_STMT
-IF_IMCOMPLETE -> SI NAMED_EXPR ENTONCES DPoint IF_STMT
-IF_INCOMPLETE -> SI NAMED_EXPR ENTONCES DPoint IF_COMPLETE SINO ENTONCES DPoint IF_INCOMPLETE
+IF_STMT_2 ->
+IF_STMT_2 -> SINO SI NAMED_EXPR ENTONCES DPoint STMT IF_STMT_2
+
+IF_STMT_3 ->
+IF_STMT_3 -> SINO ENTONCES DPoint STMT
+
 
 NAMED_EXPR -> OR_TEST
 OR_TEST -> AND_TEST
@@ -55,11 +57,8 @@ NOT_TEST -> NO NOT_TEST
 NOT_TEST -> COMPARISON
 COMPARISON ->  EXPR
 COMPARISON ->  EXPR ComOp EXPR
-
-
-if_stmt: 'if' namedexpr_test ':' suite ('elif' namedexpr_test ':' suite)* ['else' ':' suite]
-while_stmt: 'while' namedexpr_test ':' suite ['else' ':' suite]
-for_stmt: 'for' exprlist 'in' testlist ':' [TYPE_COMMENT] suite ['else' ':' suite]
+EXPR -> Atom
+EXPR -> BoolVal
 
 OP_STMT -> E
 E -> T Ep
@@ -109,3 +108,5 @@ ComOp -> '>='
 ComOp -> '<='
 ComOp -> '<>'
 ComOp -> '!='
+BoolVal -> 'True'
+BoolVal -> 'False'

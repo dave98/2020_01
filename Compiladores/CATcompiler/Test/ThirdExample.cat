@@ -1,0 +1,18 @@
+
+principal() -> retorna 0:
+  variable a = 10;
+  variable b = 5;
+  variable c = b;
+  variable farenheit , celsius ;
+  variable inferior , superior , salto  = 100 ;
+
+  inferior = 0 ;
+  superior = 300 ;
+  salto = 20 ;
+
+  farenheit = inferior
+
+  para variable i = 0 mientras i < 10 entonces:
+    i = i + 1;
+    z = z + 1;
+retorna z;

@@ -1,0 +1,5 @@
+S -> i C t S Sp
+S -> a
+Sp -> e S
+Sp -> lambda
+C -> b

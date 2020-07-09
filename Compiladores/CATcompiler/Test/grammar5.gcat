@@ -1,0 +1,5 @@
+S -> ( L )
+S -> id
+L -> S Lp
+Lp -> S Lp
+Lp -> lambda

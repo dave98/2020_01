@@ -3,11 +3,11 @@
 $Conversion Farenheit - Celsius$
 
 principal() -> retorna 0:
-  variable a = 10 ;
-  variable b = 5 ;
-  variable c = b ;
+  variable a = 10;
+  variable b = 5;
+  variable c = b;
   variable farenheit , celsius ;
-  variable inferior , superior , salto ;
+  variable inferior , superior , salto  = 100 ;
 
   inferior = 0 ;
   superior = 300 ;
@@ -15,15 +15,9 @@ principal() -> retorna 0:
 
   farenheit = inferior
 
-  mientras(farenheit <= superior) entonces:
+  mientras farenheit <= superior entonces:
     celsius = 5 * (farenheit - 32) / 9
     mostrar(farenheit, celsius)
     farenheit = farenheit + salto
 
   retorna
-
-  ARGLIST -> TPDEF Equal TEST _ARGLIST
-  ARGLIST -> TPDEF _ARGLIST
-  ARGLIST -> _ARGLIST
-  ARGLIST ->
-  _ARGLIST ->

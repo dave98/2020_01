@@ -9,34 +9,28 @@ void print(vector<int>&);
 void fill_vector(vector<int>&, int);
 
 int main(){
-  vector<int> a;
-  fill_vector(a, 20);
-  //print(a);
-
-  string identifier = "0";
-
-  regex re("[0-9][0-9]*(\\.[0-9]+)?");
-  if(regex_match(identifier, re)){
-    cout<<"Si es valido"<<endl;
+  vector<int> a = {1, 2, 3, 4, 5};
+  vector<int>::iterator it;
+  it = find(a.begin(), a.end(), 100);
+  it = a.end();
+  if(it > a.end()){
+    cout<<"More"<<endl;
   }
   else{
-    cout<<"No es valido"<<endl;
+    cout<<"Equal"<<endl;
   }
+  //cout<<*(it-1)<<endl;
+  //cout<<*(a.end()-1)<<endl;
 
-/*
-  char c_a = 'c';
-  switch (c_a) {
-    case 'a':
-      cout<<"primero"<<endl;
-      break;
-    case 'b':
-      cout<<"segundo"<<endl;
-      break;
-    default:
-      cout<<"Nothing to see"<<endl;
-      break;
+  /*
+  if(std::find(a.begin(), a.end(), 10) != a.end()){
+    cout<<"Founded"<<endl;
+  }
+  else{
+    cout<<"Not founded"<<endl;
   }
   */
+
 }
 
 

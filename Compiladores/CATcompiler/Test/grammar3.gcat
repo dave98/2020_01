@@ -1,0 +1,8 @@
+A -> a
+A -> B C D
+B -> b
+B -> lambda
+C -> c
+C -> lambda
+D -> d
+D -> C e
