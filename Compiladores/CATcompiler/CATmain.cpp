@@ -17,31 +17,21 @@ int main(){
   lexical_analizer.print();
   */
 
-  string key1 = "key1";
-  string key2 = "key2";
-  vector<string> values = {"val1", "val2", "val3"};
-
-  sintatic_table table_test;
-  table_test.insert(key1, key2, values);
-
-  cout<<endl<<"Finished correctly"<<endl;
-
-
-
-
-/*
   CATsintatic sintatic_analizer;
-  sintatic_analizer.set_grammar_to_read("Test/grammar2.gcat");
+  sintatic_analizer.set_grammar_to_read("Test/grammar1.gcat");
   //sintatic_analizer.set_grammar_to_read("Code/CATGrammar.py");
   sintatic_analizer.grammar_reader();
   sintatic_analizer.print();
-*/
+  sintatic_analizer.fill_dictionary();
 
+  sintatic_analizer.chain_validation("Test/validation1.cat");
 
+  //sintatic_analizer.my_table->print();
   // Test primeros y siguientes.
-  //vector<string> temp = sintatic_analizer.get_siguientes("F");
+  //vector<string> temp = sintatic_analizer.get_primeros("E");
+  //vector<string> temp = sintatic_analizer.get_production("Tp", "+");
   //print_vector(temp);
-  //cout<<endl<<"Finished correctly"<<endl;
+  cout<<endl<<"Finished correctly"<<endl;
 
 
 

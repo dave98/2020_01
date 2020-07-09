@@ -4,18 +4,16 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <fstream>
 
 using namespace std;
 
 template<class T>
-void print_vector(vector<T>& in_vec, bool insolate = false){
+void print_vector(vector<T>& in_vec, bool vertical = false, bool insolate = false){
   for(unsigned int i = 0; i < in_vec.size(); i++){
-    if(insolate){
-      cout<<"_"<<in_vec[i]<<"_ ";
-    }
-    else{
-      cout<<in_vec[i]<<" ";
-    }
+    if(insolate){ cout<<"_"<<in_vec[i]<<"_"; }
+    else{ cout<<in_vec[i]<<" "; }
+    if(vertical){ cout<<endl; }
   }
 }
 
@@ -42,12 +40,22 @@ vector<string> string_split(string phrase_to_separate, string delimiter = " "){
     prev = pos + delimiter.length();
   }
   while(pos < phrase_to_separate.length() && prev < phrase_to_separate.length());
-  /*
-  cout<<phrase_to_separate<<endl;
-  for(unsigned int i = 0; i < tokens.size(); i++){
-   cout<<"_"<<tokens[i]<<"_"<<endl;
- }*/
   return tokens;
+}
+
+
+vector<string> homeless_reader(string path){
+  vector<string> to_return = vector<string>(0, "");
+  ifstream i_reader = ifstream(path);
+  if(!i_reader.is_open()){cout<<"HomelessReader no puedo abrir el documento."<<endl; return vector<string>{};}
+  else{
+    string line_in = "";
+    while(!getline(i_reader, line_in).eof()){
+      to_return.push_back(line_in);
+      line_in.clear();
+    }
+  }
+  return to_return;
 }
 
 #endif

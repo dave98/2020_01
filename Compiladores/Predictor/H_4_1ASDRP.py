@@ -5,6 +5,7 @@ GRAMMAR READER
 """
 
 import os
+import re
 from AbstractExpression import *
 
 class CATsintatic_table:
@@ -385,8 +386,11 @@ class CATgrammar:
             self.get_primeros(_no_terminal, verified=False, update_table=True) # El codigo de get primeros, mientras recorre puede actualizar la tabla semantica
         print(self.my_table)
 
-    def chain_validation(self, debug = False, with_tree_at_end = False, with_tree_debug = False):
-        raw_chain = self.reader(for_root = False)
+    def chain_validation(self, val = "", debug = False, with_tree_at_end = False, with_tree_debug = False):
+        if val == "":
+            raw_chain = self.reader(for_root = False)
+        else:
+            raw_chain = [val]
 
         for chain in raw_chain: # Validando linea por linea
             print("Validando: ", chain)
@@ -534,6 +538,23 @@ class CATgrammar:
             #file.write("\t\tprint(\"" + "Interpreting from " + terminal + "\")\n\n\n")
         file.close()
 
+    def preparsing(self, statement):
+        statement = statement.replace(" ", "")
+
+        res = [re.findall(r'(\d+)(\++)?', statement)[:] ]
+
+        out = ""
+        for i in res[0]:
+            for j in range(2):
+                if i[j].isdigit():
+                    out += "num "
+                elif i[j].isalpha():
+                    out += "id "
+                else:
+                    out += i[j] + " "
+        print(statement, "->", out, "\n")
+        return out
+
 
 
     def __str__(self):
@@ -572,41 +593,28 @@ my_grammar.reader()           # Just type or paste the grammar
 my_grammar.process_grammar()  #  IN DEFAULT: process_grammar(component_separator=":=", right_component_separator="|")
                               #  Set according grammar separators
 print(my_grammar)
-#print(my_grammar.get_siguientes("F")) # +++++ NUEVO GET_SIGUIENTE +++++++
 my_grammar.fill_dictionary()  # Funcion para llenar diccionario
+
+# /// Interpreter stage /////////////////////////////////////////////
+# //////////////////////////////////////////////////////////////////
+parsed_val = my_grammar.preparsing("13+1+12+ 1 +13 +14") # -- WARNING -- For now it only works with + :
+tree_stack = my_grammar.chain_validation(parsed_val)
+
+if len(tree_stack) == 0:
+    print("Error validando - No se puede continuar")
+    exit()
+
 my_grammar.create_classes_carpet();
+try:
+    from PreParser import *
+except:
+    raise ImportError("No se pudo hallar la libreria de preparsemiento")
 
-from PreParser import *
 
-""" Cadenas a validar
-num + num + num + num
-( num + num ) + ( num + num )
-( num * ) num
-num * ( num * num )
-num + ( num * num )
-"""
-
-# Just type or paste the chain for validation
-#my_grammar.chain_validation()                                              # Proceso de validacion
-tree_stack = my_grammar.chain_validation(with_tree_at_end=True)                          # Proceso de validacion mostrando arbol al final (ln 395, 406, 413) -> Proceso de insercion en ln 129 (Incluye tres tipos de operaciones descritas en laboratiorio)
-#my_grammar.chain_validation(with_tree_at_end=True, with_tree_debug = True) # Proceso de validacion con arbol e operaciones solicitadas en laboratorio
-
-contextObj = Context("num + num + num + num", "E")
+contextObj = Context(parsed_val, "E")
 preParser = PreParser()
 for i in tree_stack:
     print("Process: ", i[0], " ", end="")
     print(i[1], " - ", end="")
     print(contextObj.start_on)
     contextObj = preParser.interprets(i[0], i[1], contextObj)
-
-
-#contextObj = Context("Hola")
-#expressionList = []
-#expressionList.append(NonTerminalExpression(1))
-#expressionList.append(TerminalExpression())
-#expressionList.append(TerminalExpression())
-#expressionList.append(menos_c())
-#expressionList.append(multiplicacion_c())
-#expressionList.append(parentesis_derecho_c())
-#for expr in expressionList:
-#    expr.interprets(contextObj);

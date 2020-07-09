@@ -13,6 +13,7 @@
 #include "lexical_lexema.h"
 #include "lexical_buffer.h"
 #include "m_functions.h"
+#include "sintatic_table.h"
 
 
 class CATsintatic{
@@ -22,6 +23,7 @@ public:
 
   vector<string> terminals;
   vector<string> non_terminals;
+  sintatic_table* my_table;
 
   string component_separator;
   string empty_component;
@@ -40,9 +42,14 @@ public:
     void grammar_construction(string); // Process line_by_line -> separate terminals from non_terminals;
     void _get_terminals_and_non_terminals(); // Inner functions, dont use them !!
 
-  vector<string> get_primeros(string);
+  vector<string> get_primeros(string, int = 0, bool = false); // Extra flags to be used as a table filler
   vector<string> get_siguientes(string);
   void fill_dictionary();
+    vector<string> get_production(string, string);
+    int get_production_helper(string, string, vector<string>, int);
+
+  void chain_validation(string = "");
+    void chain_validation_pure(vector<lexical_lexema>);
 
   void set_error(string = "Error desconocido");
   void report_error();
@@ -53,6 +60,7 @@ CATsintatic::CATsintatic(string _componente_separator, string _empty_component){
   this->route_to_gramatica = "";
   this->terminals = vector<string>(0, "");
   this->non_terminals = vector<string>(0, "");
+  this->my_table = new sintatic_table();
 
   this->component_separator = _componente_separator;
   this->empty_component = _empty_component;
@@ -139,7 +147,7 @@ void CATsintatic::_get_terminals_and_non_terminals(){
 }
 
 // not_terminal could be a terminal or non_termninal... maybe a different would be necessary
-vector<string> CATsintatic::get_primeros(string not_terminal){
+vector<string> CATsintatic::get_primeros(string not_terminal, int n_recursive, bool fill_table){
   // not_terminal is in terminals : existe en el connjunto de terminales // algorithm
   if( std::find(this->terminals.begin(), this->terminals.end(), not_terminal) != this->terminals.end()){
     return vector<string>{not_terminal};
@@ -151,8 +159,6 @@ vector<string> CATsintatic::get_primeros(string not_terminal){
   else{
     vector<string> g_primeros = vector<string>(0, "");
     for(unsigned int i = 0; i < this->productions.at(not_terminal).size(); i++){
-      string next_not_terminal = this->productions.at(not_terminal)[i][0];
-
       vector<string> candidates_to_first = this->productions.at(not_terminal)[i];
       unsigned int start_on = 0;
 
@@ -167,7 +173,6 @@ vector<string> CATsintatic::get_primeros(string not_terminal){
       }
 
       vector<string> temp = this->get_primeros(candidates_to_first[start_on]);
-
       vector<string>::iterator it;
       it = find(temp.begin(), temp.end(), this->empty_component);
       if(it != temp.end()){
@@ -176,7 +181,7 @@ vector<string> CATsintatic::get_primeros(string not_terminal){
           if(start_on >= candidates_to_first.size()){break;}
           else{
             temp.erase(it);
-            vector<string> temp_2 = this->get_primeros(candidates_to_first[start_on]);
+            vector<string> temp_2 = this->get_primeros(candidates_to_first[start_on], n_recursive+1, false);
             temp.insert(temp.end(), temp_2.begin(), temp_2.end());
             it = find(temp.begin(), temp.end(), this->empty_component);
             start_on++;
@@ -185,6 +190,7 @@ vector<string> CATsintatic::get_primeros(string not_terminal){
 
       }
       g_primeros.insert( g_primeros.end(), temp.begin(), temp.end() );
+
     }
     unordered_set<string> s(g_primeros.begin(), g_primeros.end()); // Avoiding duplicates values -> Not very common
     g_primeros.assign(s.begin(), s.end());
@@ -242,8 +248,96 @@ vector<string> CATsintatic::get_siguientes(string not_terminal){
 
 void CATsintatic::fill_dictionary(){
   for(unsigned int i = 0; i < this->non_terminals.size(); i++){
-    
+    vector<string> non_terminals_first = this->get_primeros(this->non_terminals[i]); // Primero de cada no terminal
+    for(unsigned int j = 0; j < non_terminals_first.size(); j++){
+      if (non_terminals_first[j] != this->empty_component){
+        vector<string> temp_pro = this->get_production( this->non_terminals[i], non_terminals_first[j]);
+        this->my_table->insert(this->non_terminals[i], non_terminals_first[j], temp_pro);
+      }
+      else{
+        vector<string> non_terminals_next = this->get_siguientes(this->non_terminals[i]);
+        for(unsigned int k = 0; k < non_terminals_next.size(); k++){
+            this->my_table->insert(this->non_terminals[i], non_terminals_next[k], vector<string>{this->empty_component});
+        }
+      }
+    }
   }
+}
+
+// NTnode: NoTerminals, TNode: Terminals <- Otherwise it will raise an error.
+vector<string> CATsintatic::get_production(string NTnode, string Tnode){
+  int index_best_candidates = -1;
+  int best_weight = 1000;
+
+
+  for(unsigned int i = 0; i < this->productions.at(NTnode).size(); i++){
+    vector<string> candidates = this->productions.at(NTnode)[i];
+    for(unsigned int j = 0; j < candidates.size(); j++){
+      if(candidates[j] == Tnode){
+        index_best_candidates = i;
+        best_weight = 0;
+      }
+      else{
+        if(std::find(this->non_terminals.begin(), this->non_terminals.end(), candidates[j]) != this->non_terminals.end()){
+            // Si es un no terminal
+            int result = this->get_production_helper(candidates[j], Tnode, vector<string>{candidates[j]}, 0);
+            if( (result != -1) && (result < best_weight) ){ // which means an explicit conection beetwen NTnode y Tnode
+                  index_best_candidates = i;
+                  best_weight = result;
+            }
+
+        }
+      }
+    }
+  }
+
+  if(index_best_candidates != -1){
+    return this->productions.at(NTnode)[index_best_candidates];
+  }
+  else{
+    cout<<"Warning -> Buscar produccion vacia"<<endl;
+    return vector<string>{};
+  }
+  //cout<<"Warning -> Buscar produccion vacia"<<endl;
+  //return vector<string>{};
+}
+
+int CATsintatic::get_production_helper(string NTnode, string Tnode, vector<string> path_in, int weight){
+  for(unsigned int i = 0; i < this->productions.at(NTnode).size(); i++){
+    vector<string> candidates = this->productions.at(NTnode)[i];
+    for(unsigned int j = 0; j < candidates.size(); j++){
+      if(candidates[j] == Tnode){return weight;}
+      else{
+        if( ( std::find(this->non_terminals.begin(), this->non_terminals.end(), candidates[j]) != this->non_terminals.end() ) && ( std::find(path_in.begin(), path_in.end(), candidates[j]) == path_in.end() ) ){
+          vector<string> future_path(path_in);
+          future_path.push_back(candidates[j]);
+
+          int result = this->get_production_helper(candidates[j], Tnode, future_path, weight+1);
+          if(result >= 0){return result;}
+        }
+      }
+    }
+  }
+  return -1;
+}
+
+void CATsintatic::chain_validation(string route){
+  if(route != ""){ // Useful in development enviroment - Accept only examples separated by spaces
+    vector<string> lines_in = homeless_reader(route);
+
+    for(unsigned int i = 0; i < lines_in.size(); i++){
+      vector<string> word_in_line = string_split(lines_in[i]);
+
+    }
+
+  }
+  else{ // Means we gonna work with lexical component
+    return;
+  }
+}
+
+void CATsintatic::chain_validation_pure(vector<lexical_lexema> lexemas){
+  
 }
 
 void CATsintatic::set_error(string _error){
@@ -257,6 +351,7 @@ void CATsintatic::report_error(){
 }
 
 void CATsintatic::print(bool extended){
+  cout<<endl;
   cout<<"Gramatica en: "<<this->route_to_gramatica<<endl;
   cout<<"Raiz de gramatica: "<<this->grammar_root<<endl;
   cout<<"No terminales: ";
@@ -275,6 +370,8 @@ void CATsintatic::print(bool extended){
       cout<<endl;
     }
   }
+
+  cout<<endl;
 }
 
 #endif
