@@ -2,6 +2,8 @@
 #include <vector>
 #include <string>
 #include <regex>
+#include "Code/lexical_lexema.h"
+#include "Code/m_functions.h"
 
 using namespace std;
 
@@ -9,18 +11,8 @@ void print(vector<int>&);
 void fill_vector(vector<int>&, int);
 
 int main(){
-  vector<int> a = {1, 2, 3, 4, 5};
-  vector<int>::iterator it;
-  it = find(a.begin(), a.end(), 100);
-  it = a.end();
-  if(it > a.end()){
-    cout<<"More"<<endl;
-  }
-  else{
-    cout<<"Equal"<<endl;
-  }
-  //cout<<*(it-1)<<endl;
-  //cout<<*(a.end()-1)<<endl;
+  vector<lexical_lexema> a = {lexical_lexema("primer"), lexical_lexema("segundo")};
+  cout<<a.back().first()<<endl;
 
   /*
   if(std::find(a.begin(), a.end(), 10) != a.end()){

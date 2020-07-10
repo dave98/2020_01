@@ -483,23 +483,23 @@ class CATgrammar:
 
             file.write("class " + non_terminal + "(NonTerminalExpression):\n")
 
-            #file.write("\tdef __init__(self):\n")
-            #file.write("\t\tpass\n\n")
-            #for production in self.productions.get_key_values(non_terminal):
-            #    production  = production.split()
-            #    for word in production:
-            #        if word in self.terminals:
-            #                if not word.isalnum():
-            #                    word = self.create_class_nonal_interpreter(word)
+            file.write("\tdef __init__(self):\n")
+            file.write("\t\tpass\n\n")
+            for production in self.productions.get_key_values(non_terminal):
+                production  = production.split()
+                for word in production:
+                    if word in self.terminals:
+                            if not word.isalnum():
+                                word = self.create_class_nonal_interpreter(word)
 
-            #                if not word in avoid_duplicates:
-            #                    file.write( "\t\tself." + word + "_in = " + word + "_c()\n" )
-            #                    avoid_duplicates.append(word)
-            #        else:
-            #            if not word in avoid_duplicates:
-            #                file.write("\t\tself." + word + "_in = " + word + "()\n")
-            #                avoid_duplicates.append(word)
-            #file.write("\n")
+                            if not word in avoid_duplicates:
+                                file.write( "\t\tself." + word + "_in = " + word + "_c()\n" )
+                                avoid_duplicates.append(word)
+                    else:
+                        if not word in avoid_duplicates:
+                            file.write("\t\tself." + word + "_in = " + word + "()\n")
+                            avoid_duplicates.append(word)
+            file.write("\n")
 
             file.write("\tdef interprets(self, base, childs, context):\n")
             file.write("\t\tif context.GetActualContext() == base:\n")
@@ -605,11 +605,11 @@ if len(tree_stack) == 0:
     exit()
 
 my_grammar.create_classes_carpet();
+"""
 try:
     from PreParser import *
 except:
     raise ImportError("No se pudo hallar la libreria de preparsemiento")
-
 
 contextObj = Context(parsed_val, "E")
 preParser = PreParser()
@@ -618,3 +618,4 @@ for i in tree_stack:
     print(i[1], " - ", end="")
     print(contextObj.start_on)
     contextObj = preParser.interprets(i[0], i[1], contextObj)
+"""

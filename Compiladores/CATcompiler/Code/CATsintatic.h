@@ -49,7 +49,10 @@ public:
     int get_production_helper(string, string, vector<string>, int);
 
   void chain_validation(string = "");
+    vector<lexical_lexema> dummy_lexema_converter(vector<string>&);
     void chain_validation_pure(vector<lexical_lexema>);
+
+
 
   void set_error(string = "Error desconocido");
   void report_error();
@@ -327,7 +330,8 @@ void CATsintatic::chain_validation(string route){
 
     for(unsigned int i = 0; i < lines_in.size(); i++){
       vector<string> word_in_line = string_split(lines_in[i]);
-
+      vector<lexical_lexema> lexema_set = this->dummy_lexema_converter(word_in_line);
+      this->chain_validation_pure(lexema_set);
     }
 
   }
@@ -336,8 +340,50 @@ void CATsintatic::chain_validation(string route){
   }
 }
 
-void CATsintatic::chain_validation_pure(vector<lexical_lexema> lexemas){
-  
+void CATsintatic::chain_validation_pure(vector<lexical_lexema> entry_lexemas){
+  entry_lexemas.push_back(lexical_lexema("$")); // Adding end_of_chain($) at the end of the entries
+  vector<string> stack = vector<string>(1, "$"); // Creating a stack with $ ath the beginning
+  stack.push_back(this->grammar_root);
+
+  while( !entry_lexemas.empty() && !stack.empty()){
+    if(stack.back() == entry_lexemas.front().first() ){
+      stack.pop_back();
+      entry_lexemas.erase(entry_lexemas.begin());
+    }
+    else{
+      string stack_back = stack.back(); stack.pop_back();
+      string entry_front = entry_lexemas.front().first(); //entry_lexemas.erase(entry_lexemas.begin());
+      vector<string> in_production = this->my_table->get(stack_back, entry_front);
+      std::reverse(in_production.begin(), in_production.end());
+
+      if(in_production.empty()){
+        break;
+      }
+      else{
+        for(unsigned int i = 0; i < in_production.size(); i++){
+          if(in_production[i] != this->empty_component){
+            stack.push_back(in_production[i]);
+          }
+        }
+      }
+    }
+  }
+
+  if(stack.empty() && entry_lexemas.empty()){
+    cout<<"Cadena aceptada"<<endl;
+  }
+  else{
+    cout<<"Cadena invalida"<<endl;
+  }
+}
+
+vector<lexical_lexema> CATsintatic::dummy_lexema_converter(vector<string>& tokens){
+  vector<lexical_lexema> lexema_set = vector<lexical_lexema>(0, lexical_lexema(""));
+  for(unsigned int i = 0; i < tokens.size(); i++){
+    lexical_lexema temp_lexema = lexical_lexema(tokens[i]);
+    lexema_set.push_back(temp_lexema);
+  }
+  return lexema_set;
 }
 
 void CATsintatic::set_error(string _error){

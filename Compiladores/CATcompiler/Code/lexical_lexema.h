@@ -12,6 +12,8 @@ public:
 
   lexical_lexema(string);
   lexical_lexema(string, string);
+  string first();
+  string second();
   ~lexical_lexema();
 
   friend ostream& operator << (ostream& os, const lexical_lexema& dt);
@@ -32,6 +34,15 @@ lexical_lexema::lexical_lexema(string _patron, string _descripcion){
 lexical_lexema::~lexical_lexema(){
 
 }
+
+string lexical_lexema::first(){
+  return this->patron;
+}
+
+string lexical_lexema::second(){
+  return this->descripcion;
+}
+
 
 
 ostream& operator << (ostream& os, const lexical_lexema& dt){

@@ -21,8 +21,9 @@ int main(){
   sintatic_analizer.set_grammar_to_read("Test/grammar1.gcat");
   //sintatic_analizer.set_grammar_to_read("Code/CATGrammar.py");
   sintatic_analizer.grammar_reader();
-  sintatic_analizer.print();
   sintatic_analizer.fill_dictionary();
+  sintatic_analizer.my_table->print();
+  //sintatic_analizer.print();
 
   sintatic_analizer.chain_validation("Test/validation1.cat");
 
