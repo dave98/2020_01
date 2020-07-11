@@ -14,28 +14,39 @@
 #include "lexical_buffer.h"
 #include "m_functions.h"
 #include "sintatic_table.h"
-
+#include "supervisor_symbol_table.h"
 
 class CATsintatic{
 public:
-  string route_to_gramatica;
+  // ------------------------- PRE ----------------------------------//
+  string route_to_gramatica;       // Adquired gramatic
   ifstream file_reader;
 
-  vector<string> terminals;
+  vector<string> terminals;        // Grammar heavy characteristics
   vector<string> non_terminals;
   sintatic_table* my_table;
-
-  string component_separator;
-  string empty_component;
-  string grammar_root;
   unordered_map<string, vector<vector<string>> > productions;
 
-  bool sintatic_state;
+  vector<lexical_lexema*> lexemas_to_process;
+  supervisor_symbol_table* symbol_table_manager;
+
+  string component_separator;      // Grammar characteristics
+  string empty_component;
+  string grammar_root;
+
+  bool sintatic_state;             // Error mechanism
   string error_type;
+// ------------------------- DURING ----------------------------------//
+  bool is_get_identifiers;
 
-  CATsintatic(string = "->", string = "lambda");
+// ------------------------- POST ----------------------------------//
+  bool is_postsintatic;
+//**********************************************************************************************************************************************************//
+//**********************************************************************************************************************************************************//
+  ///////////////////////////// FUNCTIONS PRE-SINTATIC /////////////////////////////////////////////////
+  ///////////////////////////// used during chain validaqation ///////////////////////////////////////
+  CATsintatic(supervisor_symbol_table*, string = "->", string = "lambda");
   ~CATsintatic();
-
   void set_grammar_to_read(string);
   void grammar_reader(); // Accept grammars with only one production in the right side. For multiple definitions, use multiples lines
     string grammar_reader_helper();
@@ -43,27 +54,38 @@ public:
     void _get_terminals_and_non_terminals(); // Inner functions, dont use them !!
 
   vector<string> get_primeros(string, int = 0, bool = false); // Extra flags to be used as a table filler
+
   vector<string> get_siguientes(string);
   void fill_dictionary();
     vector<string> get_production(string, string);
     int get_production_helper(string, string, vector<string>, int);
 
-  void chain_validation(string = "");
-    vector<lexical_lexema> dummy_lexema_converter(vector<string>&);
-    void chain_validation_pure(vector<lexical_lexema>);
-
-
+  void chain_validation(string = "", bool = false);
+    vector<lexical_lexema*> dummy_lexema_converter(vector<string>&);
+    void set_lexemas(vector<lexical_lexema*>);
+    void chain_validation_pure(vector<lexical_lexema*>, bool);
 
   void set_error(string = "Error desconocido");
   void report_error();
   void print(bool = false);
+
+  ///////////////////////////// FUNCTIONS DURING-SINTATIC /////////////////////////////////////////////////
+  ///////////////////////////// used during chain validaqation ///////////////////////////////////////
+
+
+  ///////////////////////////// FUNCTIONS POST-SINTATIC /////////////////////////////////////////////////
+  ///////////////////////////// used after chain validaqation ///////////////////////////////////////
 };
 
-CATsintatic::CATsintatic(string _componente_separator, string _empty_component){
+CATsintatic::CATsintatic(supervisor_symbol_table* _symbol_table_manager, string _componente_separator, string _empty_component){
   this->route_to_gramatica = "";
+
   this->terminals = vector<string>(0, "");
   this->non_terminals = vector<string>(0, "");
   this->my_table = new sintatic_table();
+
+  this->lexemas_to_process = vector<lexical_lexema*>(0, NULL);
+  this->symbol_table_manager = _symbol_table_manager;
 
   this->component_separator = _componente_separator;
   this->empty_component = _empty_component;
@@ -71,6 +93,10 @@ CATsintatic::CATsintatic(string _componente_separator, string _empty_component){
 
   this->sintatic_state = true;
   this->error_type = "";
+
+  this->is_get_identifiers = false;
+
+  this->is_postsintatic = false;
 }
 
 CATsintatic::~CATsintatic(){}
@@ -324,36 +350,51 @@ int CATsintatic::get_production_helper(string NTnode, string Tnode, vector<strin
   return -1;
 }
 
-void CATsintatic::chain_validation(string route){
+void CATsintatic::chain_validation(string route, bool debug){
   if(route != ""){ // Useful in development enviroment - Accept only examples separated by spaces
     vector<string> lines_in = homeless_reader(route);
 
     for(unsigned int i = 0; i < lines_in.size(); i++){
       vector<string> word_in_line = string_split(lines_in[i]);
-      vector<lexical_lexema> lexema_set = this->dummy_lexema_converter(word_in_line);
-      this->chain_validation_pure(lexema_set);
+      print_vector(word_in_line); cout<<" <-- "<<endl;/*WARNING*/
+      vector<lexical_lexema*> lexema_set = this->dummy_lexema_converter(word_in_line);
+      this->chain_validation_pure(lexema_set, debug);
     }
 
   }
   else{ // Means we gonna work with lexical component
+    if(this->lexemas_to_process.empty()){
+      this->set_error("Sin lexemas que procesar");
+    }
+    else{
+      this->chain_validation_pure(this->lexemas_to_process, debug);
+    }
     return;
   }
 }
 
-void CATsintatic::chain_validation_pure(vector<lexical_lexema> entry_lexemas){
-  entry_lexemas.push_back(lexical_lexema("$")); // Adding end_of_chain($) at the end of the entries
+void CATsintatic::chain_validation_pure(vector<lexical_lexema*> entry_lexemas, bool debug){
+  entry_lexemas.push_back(new lexical_lexema("$")); // Adding end_of_chain($) at the end of the entries
   vector<string> stack = vector<string>(1, "$"); // Creating a stack with $ ath the beginning
   stack.push_back(this->grammar_root);
 
   while( !entry_lexemas.empty() && !stack.empty()){
-    if(stack.back() == entry_lexemas.front().first() ){
+    if(debug){
+      cout<<"\tstack: "; print_vector(stack); cout<<endl;
+      cout<<"\tentry: "; for(unsigned int i = 0; i < entry_lexemas.size(); i++){cout<<entry_lexemas[i]->first()<<" ";} cout<<endl;
+    }
+    if(stack.back() == "TPDEF"){
+      cout<<"PIR_IN: "<<stack.back()<<" - "<<entry_lexemas.front()->first()<<endl;
+    }
+
+    if(stack.back() == entry_lexemas.front()->first() ){
       stack.pop_back();
       entry_lexemas.erase(entry_lexemas.begin());
     }
     else{
       string stack_back = stack.back(); stack.pop_back();
-      string entry_front = entry_lexemas.front().first(); //entry_lexemas.erase(entry_lexemas.begin());
-      vector<string> in_production = this->my_table->get(stack_back, entry_front);
+      string entry_front = entry_lexemas.front()->first(); //entry_lexemas.erase(entry_lexemas.begin());
+      vector<string> in_production = this->my_table->get(stack_back, entry_front, false);
       std::reverse(in_production.begin(), in_production.end());
 
       if(in_production.empty()){
@@ -370,20 +411,24 @@ void CATsintatic::chain_validation_pure(vector<lexical_lexema> entry_lexemas){
   }
 
   if(stack.empty() && entry_lexemas.empty()){
-    cout<<"Cadena aceptada"<<endl;
+    cout<<"Cadena aceptada"<<endl<<endl;
   }
   else{
-    cout<<"Cadena invalida"<<endl;
+    cout<<"Cadena invalida"<<endl<<endl;
   }
 }
 
-vector<lexical_lexema> CATsintatic::dummy_lexema_converter(vector<string>& tokens){
-  vector<lexical_lexema> lexema_set = vector<lexical_lexema>(0, lexical_lexema(""));
+vector<lexical_lexema*> CATsintatic::dummy_lexema_converter(vector<string>& tokens){
+  vector<lexical_lexema*> lexema_set = vector<lexical_lexema*>(0, NULL);
   for(unsigned int i = 0; i < tokens.size(); i++){
-    lexical_lexema temp_lexema = lexical_lexema(tokens[i]);
+    lexical_lexema* temp_lexema = new lexical_lexema(tokens[i]);
     lexema_set.push_back(temp_lexema);
   }
   return lexema_set;
+}
+
+void CATsintatic::set_lexemas(vector<lexical_lexema*> in_lexemas){
+  this->lexemas_to_process = in_lexemas;
 }
 
 void CATsintatic::set_error(string _error){

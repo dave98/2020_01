@@ -1,0 +1,74 @@
+S -> PRINCIPAL STMT
+
+PRINCIPAL -> principal ( ) -> retorna Atom :
+
+STMT -> SIMPLE_STMT ; STMT
+STMT -> COMPOUND_STMT ; STMT
+STMT -> lambda
+
+SIMPLE_STMT -> TPDEF
+SIMPLE_STMT -> id DEFDEF
+
+ONLY_SSTMT -> TPDEF ; ONLY_SSTMT
+ONLY_SSTMT -> id DEFDEF ; ONLY_SSTMT
+ONLY_SSTMT -> lambda
+
+
+COMPOUND_STMT -> si NEX entonces : ONLY_SSTMT IFEx2 fin
+COMPOUND_STMT -> mientras NEX entonces : ONLY_SSTMT fin
+COMPOUND_STMT -> para TPDEF considerando NEX entonces : ONLY_SSTMT fin
+
+IFEx2 -> sino NEX entonces : ONLY_SSTMT IFEx2
+IFEx2 -> IFEx3
+IFEx3 -> finalmente : ONLY_SSTMT
+IFEx3 -> lambda
+
+NEX -> NEX_T NEX_Ep
+NEX_Ep -> BComp NEX_T NEX_Ep
+NEX_Ep -> lambda
+NEX_T -> NEX_F NEX_Tp
+NEX_Tp -> SComp NEX_F NEX_Tp
+NEX_Tp -> lambda
+NEX_F -> ( NEX )
+NEX_F -> id
+
+TPDEF -> variable id TPDEF_SUB
+TPDEF_SUB -> , id TPDEF_SUB
+TPDEF_SUB -> EqualTo
+TPDEF_SUB -> lambda
+
+DEFDEF ->  EqualTo
+DEFDEF ->  AAsig
+
+EqualTo -> SEqual OP_STMT
+
+OP_STMT -> E
+E -> T Ep
+Ep -> + T Ep
+Ep -> - T Ep
+Ep -> lambda
+T -> F Tp
+Tp -> * F Tp
+Tp -> / F Tp
+Tp -> lambda
+F -> ( E )
+F -> Atom
+
+SEqual -> =
+SEqual -> +=
+SEqual -> -=
+SEqual -> *=
+AAsig -> ++
+AAsig -> --
+
+SComp -> >=
+SComp -> <=
+SComp -> !=
+SComp -> ==
+SComp -> <>
+
+BComp -> yy
+BComp -> oo
+
+Atom -> num
+Atom -> id

@@ -13,6 +13,7 @@
 
 #include "lexical_buffer.h"
 #include "lexical_lexema.h"
+#include "supervisor_symbol_table.h"
 
 using namespace std;
 typedef void (*pfunc)();
@@ -25,6 +26,9 @@ public:
   regex re_word;
   regex re_number;
 
+  supervisor_symbol_table* symbol_table_manager;
+  int actual_line;
+
   vector<lexical_lexema*> lexema_for_sintactic;
   unordered_map<string, function<void()> > reserved_words;
   unordered_map<string, function<void()> > operators;
@@ -32,15 +36,16 @@ public:
   bool lexical_state;
   string error_type;
 
-  CATlexical();
+  CATlexical(supervisor_symbol_table*);
       void initialize_reserved_words();
       void initialize_operators();
   ~CATlexical();
+  vector<lexical_lexema*> get_lexemas();
 
   void set_doc_to_read(string);  // Setea el documento a leer actualmente
   void reader();                 // Leer documento linea por linea y setear por buffer
     string reader_helper();      // Obtiene una linea del documento
-    void process_line(int = 0);         // Procesa la línea de codigo en el buffer_actual
+    void process_line();         // Procesa la línea de codigo en el buffer_actual
       void process_words();
       void process_numbers();
       void process_operator();
@@ -57,6 +62,9 @@ public:
         void funcion();
         void retorna();
         void variable();
+        void fin();
+        void considerando();
+        void finalmente();
 
         void suma();
         void resta();
@@ -75,9 +83,11 @@ public:
 
 };
 
-CATlexical::CATlexical(){
+CATlexical::CATlexical(supervisor_symbol_table* _symbol_table_manager){
   this->route_actual_doc = "";
   this->in_buffer = new lexical_buffer();
+  this->symbol_table_manager = _symbol_table_manager;
+  this->actual_line = 0;
   this->lexema_for_sintactic = vector<lexical_lexema*>(0, NULL);
   this->re_word = regex("[a-zA-Z]+");
   this->re_number = regex("[0-9][0-9]*(\\.[0-9]+)?");
@@ -88,17 +98,20 @@ CATlexical::CATlexical(){
 }
 
 void CATlexical::initialize_reserved_words(){
-  this->reserved_words["si"] =        bind(&CATlexical::si, this);
-  this->reserved_words["sino"] =      bind(&CATlexical::sino, this);
-  this->reserved_words["mientras"] =  bind(&CATlexical::mientras, this);
-  this->reserved_words["para"] =      bind(&CATlexical::para, this);
-  this->reserved_words["entonces"] =  bind(&CATlexical::entonces, this);
-  this->reserved_words["yy"] =        bind(&CATlexical::yy, this);
-  this->reserved_words["oo"] =        bind(&CATlexical::oo, this);
-  this->reserved_words["principal"] = bind(&CATlexical::principal, this);
-  this->reserved_words["funcion"] =   bind(&CATlexical::funcion, this);
-  this->reserved_words["retorna"] =   bind(&CATlexical::retorna, this);
-  this->reserved_words["variable"] =  bind(&CATlexical::variable, this);
+  this->reserved_words["si"] =           bind(&CATlexical::si, this);
+  this->reserved_words["sino"] =         bind(&CATlexical::sino, this);
+  this->reserved_words["mientras"] =     bind(&CATlexical::mientras, this);
+  this->reserved_words["para"] =         bind(&CATlexical::para, this);
+  this->reserved_words["entonces"] =     bind(&CATlexical::entonces, this);
+  this->reserved_words["yy"] =           bind(&CATlexical::yy, this);
+  this->reserved_words["oo"] =           bind(&CATlexical::oo, this);
+  this->reserved_words["principal"] =    bind(&CATlexical::principal, this);
+  this->reserved_words["funcion"] =      bind(&CATlexical::funcion, this);
+  this->reserved_words["retorna"] =      bind(&CATlexical::retorna, this);
+  this->reserved_words["variable"] =     bind(&CATlexical::variable, this);
+  this->reserved_words["fin"] =          bind(&CATlexical::fin, this);
+  this->reserved_words["considerando"] = bind(&CATlexical::considerando, this);
+  this->reserved_words["finalmente"] =   bind(&CATlexical::finalmente, this);
 }
 
 // BNFA  structure
@@ -127,6 +140,11 @@ void CATlexical::initialize_operators(){
 CATlexical::~CATlexical(){
 }
 
+
+vector<lexical_lexema*> CATlexical::get_lexemas(){
+  return this->lexema_for_sintactic;
+}
+
 void CATlexical::set_doc_to_read(string new_route){
   this->route_actual_doc = new_route;
 }
@@ -142,13 +160,12 @@ void CATlexical::reader(){
   }
   else{
     string current_statement = "";
-    int actual_line = 0;
     while(true){
       current_statement = this->reader_helper();
       if (current_statement != "eof"){
         this->in_buffer->fill_buffer(current_statement);
-        this->process_line(actual_line);
-        actual_line++;
+        this->process_line();
+        this->actual_line++;
       }
       else{
         break;
@@ -172,11 +189,12 @@ string CATlexical::reader_helper(){
 }
 
 // Procesamiento será realizado línea por linea
-void CATlexical::process_line(int line_id){
+void CATlexical::process_line(){
   int scope_in_line = this->in_buffer->get_scope();
   if(scope_in_line == -1){ // Linea vacía
     return;
   }
+  this->symbol_table_manager->update_supervisor(scope_in_line);
   // At this point we know there is something in the line. El get_next will always be the fisrt character un expresion
   while(this->continue_evaluation() && this->in_buffer->get_next_no_change() != '@'){
     this->process_words();
@@ -204,8 +222,9 @@ void CATlexical::process_words(){
     return;
   }
   else if(this->is_word(in_word)){
-    lexical_lexema* new_lexema = new lexical_lexema("identificador", in_word);
+    lexical_lexema* new_lexema = new lexical_lexema("id", in_word, this->actual_line);
     this->lexema_for_sintactic.push_back(new_lexema);
+    this->symbol_table_manager->add_new_identifier(new_lexema);
     //cout<<*new_lexema<<endl;
     return;
   }
@@ -226,7 +245,7 @@ void CATlexical::process_numbers(){
   in_number.pop_back();
 
   if(this->is_number(in_number)){
-    lexical_lexema* new_lexema = new lexical_lexema("numero", in_number);
+    lexical_lexema* new_lexema = new lexical_lexema("num", in_number);
     this->lexema_for_sintactic.push_back(new_lexema);
     //cout<<*new_lexema<<endl;
     return;
@@ -543,6 +562,20 @@ void CATlexical::variable(){
   this->lexema_for_sintactic.push_back(new_lexema);
 }
 
+void CATlexical::fin(){
+  lexical_lexema* new_lexema = new lexical_lexema("fin");
+  this->lexema_for_sintactic.push_back(new_lexema);
+}
+
+void CATlexical::considerando(){
+  lexical_lexema* new_lexema = new lexical_lexema("considerando");
+  this->lexema_for_sintactic.push_back(new_lexema);
+}
+
+void CATlexical::finalmente(){
+  lexical_lexema* new_lexema = new lexical_lexema("finalmente");
+  this->lexema_for_sintactic.push_back(new_lexema);
+}
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool CATlexical::is_word(string in_word){

@@ -61,8 +61,7 @@ int lexical_buffer::get_actual_buffer_size(){
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int lexical_buffer::get_scope(){
-
-  if(!this->get_actual_buffer_size()){
+  if(this->get_actual_buffer_size() == 1 ){ // which means only '@' is in the buffer
     return -1;
   }
 

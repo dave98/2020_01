@@ -17,7 +17,7 @@ public:
   ~sintatic_table();
 
   void insert(string, string, vector<string>);
-  vector<string> get(string, string);
+  vector<string> get(string, string, bool=true);
   void print();
 
 };
@@ -43,12 +43,12 @@ void sintatic_table::insert(string key1, string key2, vector<string> inter_val){
 
 // No funciona con referencias directas. O sea su valor no puedo ser utilizado  hasta no ser colocado
 // adecuadamente en una variable
-vector<string> sintatic_table::get(string key1, string key2){//Use ctch expression
+vector<string> sintatic_table::get(string key1, string key2, bool debug){//Use ctch expression
   if( (this->table.find(key1) != this->table.end()) && (this->table[key1].find(key2) != this->table[key1].end()) ){
     return this->table[key1][key2];
   }
   else{
-    cout<<"Error en tabla - No existe valor descrito para "<<key1<<" y "<<key2<<endl;
+    if(debug){ cout<<"Error en tabla - No existe valor descrito para "<<key1<<" y "<<key2<<endl;}
     return vector<string>{};
   }
 }
