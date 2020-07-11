@@ -4,9 +4,11 @@
 
 #include "code/CATlexical.h"
 #include "code/CATsintatic.h"
+#include "code/CATsemantic.h"
 #include "code/m_functions.h"
 #include "code/supervisor_symbol_table.h"
 #include "code/lexical_lexema.h"
+#include "code/sintatic_tree.h"
 
 using namespace std;
 
@@ -26,8 +28,12 @@ int main(){
   sintatic_analizer.fill_dictionary();
   sintatic_analizer.set_lexemas(lexemas_in);
   //sintatic_analizer.my_table->print();
-
   sintatic_analizer.chain_validation("", false);
+
+
+  sintatic_tree* temp_tree = sintatic_analizer.get_tree_for_semantics();
+  CATsemantic semantic_analyzer(temp_tree);
+  semantic_analyzer.print_tree();
   cout<<endl<<"Finished correctly"<<endl;
 
   return 0;

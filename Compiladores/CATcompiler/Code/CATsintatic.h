@@ -15,6 +15,9 @@
 #include "m_functions.h"
 #include "sintatic_table.h"
 #include "supervisor_symbol_table.h"
+#include "sintatic_tree.h"
+
+using namespace std;
 
 class CATsintatic{
 public:
@@ -26,6 +29,7 @@ public:
   vector<string> non_terminals;
   sintatic_table* my_table;
   unordered_map<string, vector<vector<string>> > productions;
+  sintatic_tree* inner_tree;
 
   vector<lexical_lexema*> lexemas_to_process;
   supervisor_symbol_table* symbol_table_manager;
@@ -65,16 +69,20 @@ public:
     void set_lexemas(vector<lexical_lexema*>);
     void chain_validation_pure(vector<lexical_lexema*>, bool);
 
-  void set_error(string = "Error desconocido");
-  void report_error();
-  void print(bool = false);
-
   ///////////////////////////// FUNCTIONS DURING-SINTATIC /////////////////////////////////////////////////
   ///////////////////////////// used during chain validaqation ///////////////////////////////////////
 
 
   ///////////////////////////// FUNCTIONS POST-SINTATIC /////////////////////////////////////////////////
   ///////////////////////////// used after chain validaqation ///////////////////////////////////////
+  sintatic_tree* get_tree_for_semantics();
+
+  ////////////////////////////////////// EXTRA COMPONENTS //////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
+  void set_error(string = "Error desconocido");
+  void report_error();
+  void print(bool = false);
+
 };
 
 CATsintatic::CATsintatic(supervisor_symbol_table* _symbol_table_manager, string _componente_separator, string _empty_component){
@@ -83,6 +91,7 @@ CATsintatic::CATsintatic(supervisor_symbol_table* _symbol_table_manager, string 
   this->terminals = vector<string>(0, "");
   this->non_terminals = vector<string>(0, "");
   this->my_table = new sintatic_table();
+  this->inner_tree = new sintatic_tree();
 
   this->lexemas_to_process = vector<lexical_lexema*>(0, NULL);
   this->symbol_table_manager = _symbol_table_manager;
@@ -383,11 +392,13 @@ void CATsintatic::chain_validation_pure(vector<lexical_lexema*> entry_lexemas, b
       cout<<"\tstack: "; print_vector(stack); cout<<endl;
       cout<<"\tentry: "; for(unsigned int i = 0; i < entry_lexemas.size(); i++){cout<<entry_lexemas[i]->first()<<" ";} cout<<endl;
     }
-    if(stack.back() == "TPDEF"){
-      cout<<"PIR_IN: "<<stack.back()<<" - "<<entry_lexemas.front()->first()<<endl;
-    }
-
+    /**/
+    //if(stack.back() == "TPDEF"){
+    //  cout<<"PIR_IN: "<<stack.back()<<" - "<<entry_lexemas.front()->first()<<endl;
+    //}
     if(stack.back() == entry_lexemas.front()->first() ){
+      this->inner_tree->insert(stack.back(), vector<string>{}, entry_lexemas.front() ,debug); //// TREE CONFIGURATION
+
       stack.pop_back();
       entry_lexemas.erase(entry_lexemas.begin());
     }
@@ -395,6 +406,9 @@ void CATsintatic::chain_validation_pure(vector<lexical_lexema*> entry_lexemas, b
       string stack_back = stack.back(); stack.pop_back();
       string entry_front = entry_lexemas.front()->first(); //entry_lexemas.erase(entry_lexemas.begin());
       vector<string> in_production = this->my_table->get(stack_back, entry_front, false);
+
+      this->inner_tree->insert(stack_back, in_production, entry_lexemas.front() ,debug);
+
       std::reverse(in_production.begin(), in_production.end());
 
       if(in_production.empty()){
@@ -429,6 +443,17 @@ vector<lexical_lexema*> CATsintatic::dummy_lexema_converter(vector<string>& toke
 
 void CATsintatic::set_lexemas(vector<lexical_lexema*> in_lexemas){
   this->lexemas_to_process = in_lexemas;
+}
+
+
+sintatic_tree* CATsintatic::get_tree_for_semantics(){
+  if(this->inner_tree->root_reached){
+    return this->inner_tree;
+  }
+  else{
+    cout<<"Error: Este arbol no esta listo para el analisis semantico"<<endl;
+    return NULL;
+  }
 }
 
 void CATsintatic::set_error(string _error){
