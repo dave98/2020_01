@@ -34,6 +34,9 @@ int main(){
   sintatic_tree* temp_tree = sintatic_analizer.get_tree_for_semantics();
   CATsemantic semantic_analyzer(temp_tree);
   semantic_analyzer.print_tree();
+  semantic_analyzer.generate_code();
+
+
   cout<<endl<<"Finished correctly"<<endl;
 
   return 0;
