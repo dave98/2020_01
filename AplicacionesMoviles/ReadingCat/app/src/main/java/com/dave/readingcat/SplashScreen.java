@@ -24,8 +24,8 @@ public class SplashScreen extends AppCompatActivity {
     ImageView image;
     TextView logo, slogan;
 
-    private File storage;
-    private String[] allPath;
+    //private File storage;
+    //private String[] allPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,11 +47,11 @@ public class SplashScreen extends AppCompatActivity {
         slogan.setAnimation(bottomAnim);
 
         //Loading Data Taken From https://www.youtube.com/watch?v=TQg98mQL2hs
-        allPath = StorageUtil.getStorageDirectories(this);
-        for(String path : allPath){
-            storage = new File(path);
-            Method.load_Directory_Files(storage);
-        }
+        //allPath = StorageUtil.getStorageDirectories(this);
+        //for(String path : allPath){
+        //    storage = new File(path);
+        //    Method.load_Directory_Files(storage);
+        //}
 
 
         //After SPLASH_SCREEN time, we go to the next activity

@@ -6,6 +6,10 @@
     <string name="app_login_password">Password</string>
     <string name="app_login_forget_password">Forget Password?</string>
     <string name="app_login_login">Login</string>
+    <string name="app_login_register">New here? Create an Account.</string>
+    <string name="app_register_email">Email</string>
+    <string name="app_register_register">Register</string>
+    <string name="app_register_login">Already registered? Login here.</string>
     <string name="navigation_drawer_open">Open navigator</string>
     <string name="navigation_drawer_close">Close navigator</string>
     <!-- TODO: Remove or change this placeholder text -->
