@@ -1,0 +1,271 @@
+CONTENEDORES --------------------------------------------------------------------------------------------------------------
+
+-Contruir una imagen docker:
+docker build -t <nombre_del_contenedor> .
+	-t : tag de la imagen
+	. looking in local directory to construct from Dockerfile (this has not extensions)
+
+-Ejecutar el contenedor docker:
+docker run -dp 3000:3000 <nombre_del_contenedor>
+	-dp -> -d running in background
+	-3000 escuchando en puerto 3000 localhost y puerto 3000 de contenedor.
+
+-Obtener el id de un contenedor:
+docker ps
+
+-Detener un contenedor:
+docker stop <container_id>
+
+-Eliminar un contenedor: 
+docker rm <container_id>
+
+-Ubicar una imagen de contenedor
+docker image ls
+
+-Iniciar sesión en docker desde consola:
+docker login -u dave98 
+	Necesario para subir imagenes de contenedores en docker.
+
+-Subir un docker a cloud:
+docker push dave98/getting-started:tagname
+
+-Tag un contenedor
+docker tag getting-started YOUR-USER-NAME/<nombre_del_contenedor>
+
+-Push un contenedor a DockerHub
+docker push dave98/getting-started:tagname
+	En caso no usemos tagname, docker automaticamente añadira lastest
+
+-Creando un contenedor con ubuntu:
+docker run -d ubuntu bash -c "shuf -i 1-10000 -n 1 -o /data.txt && tail -f /dev/null"
+	bash -> comando para crear un archivo txt de nombre aleatorio
+
+-Ejecutar un comando para un contenedor docker
+docker exec <container-id> cat /data.txt
+	cat /data.txt es el comamdo
+
+VOLUMENES --------------------------------------------------------------------------------------------------------------------
+-Crear un volumen
+docker volume create <nombre_de_volumen>
+
+-Iniciando el contenedor con el volumen persistente
+docker run -dp 3000:3000 -v <nombre_volumen>:<ruta_a_montar> getting-started
+	-v Flag para el uso del volumen
+	todo-db Nombre del volumen
+	/etc/todos Ruta desde donde se montara el voumen.
+	EJEMPLO: docker run -dp 3000:3000 -v todo-db:/etc/todos getting-started
+
+
+-Inspeccionar como docker almacena los volumenes persistentes
+docker volume inspect <nombre_de_volumen>
+	En docker-desktop no sera posible ubicar el archivo de forma directa pues todo se ejecuta bajo una VM simple.
+	No preocupa mucho en lugar en donde esa data sera guardada
+
+
+BIND MOUNTS: (Para contenedores en modo desarrollador)
+-Desplegar aplicacion en modo desarrollador
+docker run -dp 3000:3000 -w /app -v ${PWD}:/app node:12-alpine sh -c "yarn install && yarn run dev"
+docker run -dp 3000:3000 -w /app -v %cd%:/app node:12-alpine sh -c "yarn install && yarn run dev"                        WINDOWS enviroment.
+	-dp 3000:3000    (visto previamente) Modo de ejecución del contenedor y mapeamiento de puertos.
+	-w /app          Define el directorio en donde se realizara todo el trabajo.
+	-v ${PWD}:/app   bind mount el directorio actual en el directorio creado en /app
+	node:12-alpine   Imagen base desde donde empezaremos a trabajar
+	sh -c "yarn install && yarn run dev" COMANDO necesario pues Alpine no posee un shell. El comando ejecuta lo siguiente:
+		yarn install   En donde se instalan todas las dependencias.
+		yarn run dev   En donde <dev> es un script para ejecutar nodemon. (Cambios en la aplicacion son reflejados de forma automatica).
+
+docker logs -f <id_contenedor>
+	En tutorial se utilizó inmediatamente despues del comando previo
+	Similar a docker run
+
+AÑADIENDO SOPORTE PARA MySQL - MULTIPLES CONTENEDORES CONVERSANDO --------------------------------------------------------------------------------------------------------------------
+-Dos contenedores pueden ejecutarse si estan en la misma red. Existe dos formas de añadir un contenedor a una red. Asignando al principio o añadiendo el contenedor ya existente.
+-Creando la red (Utilizaremos la segunda forma).
+docker network create <nombre_red>
+
+-Creando un contenedor con MySQL.
+docker run -d --network <nombre_red> --network-alias <alias_contenedor_en_red> -v <nombre_volumen>:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=<contraseña> -e MYSQL_DATABASE=<nueva_basedatos> mysql:5.7
+docker run -d --network todo-app --network-alias mysql -v todo-mysql-data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=secret -e MYSQL_DATABASE=todos mysql:5.7
+	Notar que creamos el volumen todo-mysql-data en /var/lib/mysql (donde mysql guarda sus datos) sin antes haberlo declarado.
+	Docker detecta automaticamente esa intención.
+
+-Verificando que el contenedor esta ejecutandose de forma correcta
+docker exec -it <mysql-container-id> mysql -p
+	mysql -p   Comando de consulta para abrir mysql
+
+-Conectar la app con MYSQL
+-Para lograrlo se necesita definir variables de entorno.
+docker run -dp 3000:3000 -w /app -v %cd%:/app --network <nombre_red> -e MYSQL_HOST=mysql -e MYSQL_USER=root -e MYSQL_PASSWORD=secret -e MYSQL_DB=todos node:12-alpine sh -c "yarn install && yarn run dev"
+docker run -dp 3000:3000 -w /app -v %cd%:/app --network todo-app -e MYSQL_HOST=mysql -e MYSQL_USER=root -e MYSQL_PASSWORD=secret -e MYSQL_DB=todos node:12-alpine sh -c "yarn install && yarn run dev"
+              ||
+docker run -dp 3000:3000 \
+  -w /app -v %cd%:/app \
+  --network todo-app \
+  -e MYSQL_HOST=mysql \
+  -e MYSQL_USER=root \
+  -e MYSQL_PASSWORD=secret \
+  -e MYSQL_DB=todos \
+  node:12-alpine \
+  sh -c "yarn install && yarn run dev"
+
+-Arrancar la aplicacion con logs:
+docker logs -f <id_contenedor>
+
+-Con el contenedor ya ejecutandose vamos a MySQL con (contraseña es secret):
+docker exec -ti <mysql-container-id> mysql -p todos
+
+-Dentro vemos los elementos de la tabla todos con:
+select * from todo_items;
+
+
+DOCKER COMPOSE ----------------------------------------------------------------------------------------------------------------------------------------------------------
+- Es muy pesado tener que realizar todas las operaciones previas una y otra vez. Para evitarlo definiremos todo en un archivo YAML (Ver proyecto en Visual Code)
+- Con el archivo YAML completo pasamos a construir la aplicacion con:
+docker-compose up -d
+
+- Ver los logs de los contenedores con: (Se utiliza tambien para arrancar la aplicacion)
+docker-compose logs -f <app_name>
+docker-compose logs -f app
+
+
+- Eliminar docker-compose
+docker-compose down --volumes
+
+
+PURGAR EL SISTEMA DE ELEMENTOS NO UTILIZADOS -------------------------------------------------------------------------------------------------------------------------
+docker system prune --volumes
+
+
+PLAY WITH DOCKER-------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------
+- Descargar y ejecutar un contenedor (especialmente para ejecutar codigo una vez y listo)
+docker container run alpine hostname
+
+- Ver todas las imagenes de contenedores actuales
+docker container ls --all
+
+- Ejecutar un contenedor ubuntu con shell interactivo
+docker container run --interactive --tty --rm ubuntu bash
+	--interactive --tty   Solicita una sesión interactiva
+	--rm                  Docker will destroy the container once the work is done
+
+- CREANDO CONTENEDOR MYSQL (si, otra vez)
+docker container run --detach --name <nombre_contenedor(y si nombre de verdad)> -e MYSQL_ROOT_PASSWORD=secret mysql:latest
+docker container run --detach --name mydb -e MYSQL_ROOT_PASSWORD=secret mysql:latest
+
+- Ver lo que sucede con el contenedor Docker
+docker container logs -f <nombre_contenedor>
+docker container logs -f mydb
+
+- Verificar procesos en el contenedor:
+docker container top <nombre_contenedor>
+docker container top mydb
+
+- Verificar la version de MySQL en linea de comando:
+docker exec -it mydb mysql --user=root --password=$MYSQL_ROOT_PASSWORD --version
+	docker exec -it mydb   Ejecutar una linea de comando y conectarse con la misma
+	$MYSQL_ROOT_PASSWORD   Variable de entorno con el password para el usuario de MySQL
+
+- Conectarse al shell de MySQL para hacer lo mismo pero desde adentro
+docker exec -it <nombre_contenedor> sh
+docker exec -it mydb sh
+	OJO: Conectandose al shell general, no a la linea de comando de MySQL
+
+EMPAQUETANDO UNA APLICACION
+- Con el docker file del tutorial linux_tweet construimos el nuevo contenedor
+docker image build --tag <docker_id>/linux_tweet_app:1.0 .
+docker image build --tag dave98/linux_tweet_app:1.0 .
+
+- Ejecutando el nuevo contenedor
+docker container run --detach --publish 90:80 --name linux_tweet_app dave98/linux_tweet_app:1.0
+
+- Despues lo detenemos y borramos (ya visto), con algunos cambios
+docker stop <container_id o container_name>
+docker rm <container_id o container_name>
+
+MODIFICANDO UN SITIO EN TIEMPO DE EJECUCIÓN
+- Ahhh, para eso servían los bind mount.
+docker container run --detach --publish 90:80 --name linux_tweet_app --mount type=bind,source=%cd%,target=/usr/share/nginx/html <docker_id>/linux_tweet_app:1.0
+docker container run --detach --publish 90:80 --name linux_tweet_app --mount type=bind,source=%cd%,target=/usr/share/nginx/html dave98/linux_tweet_app:1.0
+
+docker container run --detach --publish 90:80 --name linux_tweet_app -v %cd%:/usr/share/nginx/html dave98/linux_tweet_app:1.0
+	Notar que ambos comando poseen una función similar.
+	Para diferencias entre -v y --mount busca aqui: https://docs.docker.com/storage/bind-mounts/
+
+- Tras cambiar index.html por otro con fondo es necesario saber que estos cambios no seran permanentes.
+- Si removemos el contenedor y lo volvemos a lanzar sin el bind mount, los cambios que hicimos no se veran reflejados.
+docker run -dp 90:80 --name linux_tweet_app dave98/linux_tweet_app:1.0
+
+- Conservar los cambios implica volver a construir la imagen del contenedor. (Aunque lo haremos con una segunda version)
+docker image build --tag dave98/linux_tweet_app:2.0 .
+
+- Ahora si vemos el grupo de imagenes notaremos esta aplicacion con su segunda version.
+docker image ls
+
+- Pasemos a probar la nueva version:
+docker container run -dp 90:80 --name linux_tweet_app dave98/linux_tweet_app:2.0
+- Y comparemos con la version vieja:
+docker container run -dp 91:80 --name old_linux_tweet_app dave98/linux_tweet_app:1.0
+
+- Por cierto "docker container run" es igual a "docker run"
+
+SUBIENDO IMAGENES A DOCKER HUB (si otra vez):
+- Listamos las imagenes que tengan nuestro docker id:
+docker image ls -f reference="$dave98/*"
+docker image ls -f reference="dave98/*"                           WINDOWS enviroment
+ 
+- Tras logearnos procedemos a subir las imagenes.
+docker image push dave98/linux_tweet_app:1.0
+
+- Tras subir la segunda versión algunos layers ya estaran creados por lo que el proceso sera mucho mas rapido.
+
+// CONTENERIZACION CON MULTIPLES CONTENEDORES --------------------------------------------------------------------------------------------------------------------------
+
+- CONTENERIZANDO el script para la extraccion de link. Step 1.
+docker image build -t linkextractor:step1 .
+	Basicamente con esto se creo un contenedor con compilador python imbuido.
+
+- Ejecutando el contenedor
+docker container run -it --rm linkextractor:step1 https://training.play-with-docker.com/
+
+	Es posible que existan errores por incompatibilidad de formatos
+	Beware with end of lines -> In visual code set LF("\n") for unix and CRLF("\r\n") for Windows
+
+- Normalizando URL, ahora creamos la segunda version del contenedor
+docker image build -t linkextractor:step2 .
+docker container run -it --rm linkextractor:step2 https://training.play-with-docker.com/
+
+- Creando servidor interno con flask (Abrir directorio con paso 3)
+docker image build -t linkextractor:step3 .
+docker container run -d -p 5000:5000 --name=linkextractor linkextractor:step3
+
+	Despues vamos al buscador y colocamos: http://localhost:5000/api/https://training.play-with-docker.com/
+	O con curl: curl -i http://localhost:5000/api/https://training.play-with-docker.com/
+
+- Tambien podemos captar algunos logs con:
+docker container logs linkextractor
+
+	linkextractor es el nombre de la aplicacion
+
+- Step4 Añadiendo un frontend con php como servidor 
+docker-compose up -d --build
+	El proyecto esta montado en un --mount por lo que los cambios se realizan de manera automatica
+	curl -i http://localhost:5000/api/https://training.play-with-docker.com/
+	http://localhost:90
+
+- Step5 Soporte con Redis para persistencia de datos
+
+
+- Reestart a Ubuntu container with bash included:
+docker exec -it Container1 bin/bash
+
+
+
+
+
+
+
+
+
+
+
