@@ -1,0 +1,19 @@
+principal()->retorna id:
+  para variable id considerando id <= id oo id == id entonces:
+  fin ;
+  id = id;
+
+
+  $ Comentrio letorio $
+  si id <= id entonces :
+
+    variable id = num ;
+  sino id entonces:
+    id = id;
+  sino id entonces:
+    variable ju = 220;
+  sino id entonces:
+    variable ju = 220;
+  finalmente :
+    id = id ;
+  fin;

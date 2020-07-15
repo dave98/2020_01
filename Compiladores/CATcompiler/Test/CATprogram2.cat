@@ -1,0 +1,13 @@
+principal ( ) -> retorna primer :
+
+  variable primer = 29;
+  variable segundo = 809;
+
+  si primer < segundo entonces :
+    primer = segundo;
+    segundo = segundo * 2 ;
+  sino primer > segundo entonces:
+    segundo = primer + 20;
+  finalmente :
+    primer = segundo ;
+  fin;

@@ -11,18 +11,6 @@ void print(vector<int>&);
 void fill_vector(vector<int>&, int);
 
 int main(){
-  vector<lexical_lexema> a = {lexical_lexema("primer"), lexical_lexema("segundo")};
-  cout<<a.back().first()<<endl;
-
-  /*
-  if(std::find(a.begin(), a.end(), 10) != a.end()){
-    cout<<"Founded"<<endl;
-  }
-  else{
-    cout<<"Not founded"<<endl;
-  }
-  */
-
 }
 
 

@@ -1,0 +1,6 @@
+principal ( )->  retorna num:
+  mientras id <= id entonces :
+    variable id = 5;
+  fin;
+
+  variable id = 456 ;

@@ -7,6 +7,10 @@ GRAMMAR READER
 import os
 import re
 from AbstractExpression import *
+from CATlexical_parser import *
+from CATerror_manager import *
+from CATsemantic import *
+from lexema import *
 
 class CATsintatic_table:
     def __init__(self):
@@ -102,12 +106,13 @@ class CATproduction:
 
 #Using in built pointer implementation (Diferente variables points to the same inmutable objetc)
 class CATNode:
-    def __init__(self, _etiqueta, _hijos, _padre):
+    def __init__(self, _etiqueta, _hijos, _padre, _val = ""): # For num and iden
         self.etiqueta = _etiqueta
         self.hijos = _hijos
         self.padre = _padre
         self.siguiente = 0
         self.n_hijos = []
+        self.val = _val
 
     def add_child(self, new_child):
         self.n_hijos.append(new_child)
@@ -127,18 +132,18 @@ class CATree:
 
         self.dictio_visualizer = {}
 
-    def insert(self, _etiqueta, _hijos, debug = False):
+    def insert(self, _etiqueta, _hijos, debug = False, _val = ""):
         if self.is_usable:
             if debug: print(_etiqueta, ": ", end="")
             if not self.root:
-                temp_node = CATNode(_etiqueta, _hijos, None)
+                temp_node = CATNode(_etiqueta, _hijos, None, _val)
                 self.root = temp_node
                 self.actual_node = temp_node
                 if debug: print("\t Creando Raiz")
 
             else:
                 if self.down_to_first_child() == _etiqueta :                        # Evaluando primer hijo es equivalente a la etiqueta ingresante
-                    temp_node = CATNode(_etiqueta, _hijos, self.actual_node)        # Por lo general siempre es verdadero
+                    temp_node = CATNode(_etiqueta, _hijos, self.actual_node, _val)        # Por lo general siempre es verdadero
                     self.actual_node.add_child(temp_node)
                     self.actual_node = temp_node
                     if debug: print("\t Insercción normal -> Op 1")
@@ -148,7 +153,7 @@ class CATree:
                     if self.actual_node != None:
                         #print("-->", self.actual_node.hijos, "-->", self.actual_node.siguiente)
                         if self.actual_node.hijos[self.actual_node.siguiente] == _etiqueta:
-                            temp_node = CATNode(_etiqueta, _hijos, self.actual_node)
+                            temp_node = CATNode(_etiqueta, _hijos, self.actual_node, _val)
                             self.actual_node.add_child(temp_node)
                             self.actual_node = temp_node
                             if debug: print("\t Insercción siguiente -> Op 2")
@@ -212,11 +217,12 @@ class CATree:
         return
 
 class CATgrammar:
-    def __init__(self):
+    def __init__(self, _error_tracker):
         self.raw_grammar = []
 
         self.productions = CATproduction()
         self.my_table = CATsintatic_table()
+        self.error_tracker = _error_tracker;
         self.terminals = []
         self.non_terminals = []
 
@@ -276,43 +282,15 @@ class CATgrammar:
         self._get_terminals()
         self._get_non_terminals()
 
-    # Primer nodo terminal a la derecha de la produccion
-    def get_primero(self, not_terminal):
-        if not self.productions.is_usable():
-            print("No se puede utilizar esta funcion sin construir la gramatica")
-            return
-        if not_terminal in self.terminals:
-            return [not_terminal]
-        elif not self.productions.is_key_on_dictionary(not_terminal):
-            print(not_terminal, "no existe")
-            return ""
-        else:
-            terminal_founded = False
-            t_production = self.productions.get_key_values(not_terminal)[0] #WARNING Assuming each non terminal has at least one production. Check later
-            t_production = t_production.split()[0] # WARNING Assuming each composition is separated by " "
-            while not terminal_founded:
-                #print("Looking for:", t_production)
-                if t_production in self.terminals:
-                    terminal_founded = True # Just to be sure
-                    return t_production
-                elif not self.productions.is_key_on_dictionary(t_production):
-                    print("ERROR: Gramatica mal estructurada - Imposible encontrar primero para", not_terminal)
-                    terminal_founded = True
-                    return ""
-                else:
-                    t_production = self.productions.get_key_values(t_production)[0].split()[0]
-
     def get_primeros(self, not_terminal, verified = True, n_recursive = 0, update_table=False):
         if verified:
-            print("-->", not_terminal, ": ", end = '')
             if not self.productions.is_usable():
-                print("No se puede utilizar esta funcion sin construir la gramatica")
+                self.error_tracker.add_error(-1, 104) # <-------- ERROR MANAGER
                 return ""
-
         if not_terminal in self.terminals:
             return [not_terminal]
         elif not self.productions.is_key_on_dictionary(not_terminal):
-            print(not_terminal, "no existe")
+            self.error_tracker.add_error(-1, 103)  # <------ ERROR MANAGER
             return ""
         else:
             g_primeros = []
@@ -336,15 +314,14 @@ class CATgrammar:
 
     def get_siguientes(self, i_terminal, verified = True, n_recursive = 0):
         if verified:
-            print("--> Siguientes de ", i_terminal, ": ", end = '')
             if not self.productions.is_usable():
-                print("No se puede utilizar esta funcion sin construir la gramatica")
+                self.error_tracker.add_error(-1, 106) # <------ ERROR MANAGER
                 return ""
 
         if i_terminal in self.terminals:
             return [i_terminal]
         elif not self.productions.is_key_on_dictionary(i_terminal):
-            print(i_terminal, "no existe")
+            self.error_tracker.add_error(-1, 105) # <------- ERROR MANAGER
             return ""
         else:
             a_siguiente = []
@@ -354,7 +331,6 @@ class CATgrammar:
 
             all_productions = self.productions.get_all_values() # Contains a list with all rigth productions organized in a list of lists
                                                                 # Each list in this list comes from a specific non terminal in its postion is according to the same non terminal in self.non_terminals
-
             for nonterminal_production in all_productions:
                 prepare_for_circular_references = False
                 if all_productions.index(nonterminal_production) == self.non_terminals.index(i_terminal):
@@ -386,44 +362,41 @@ class CATgrammar:
             self.get_primeros(_no_terminal, verified=False, update_table=True) # El codigo de get primeros, mientras recorre puede actualizar la tabla semantica
         print(self.my_table)
 
-    def chain_validation(self, val = "", debug = False, with_tree_at_end = False, with_tree_debug = False):
-        if val == "":
-            raw_chain = self.reader(for_root = False)
-        else:
-            raw_chain = [val]
+    def chain_validation(self, container_chain_lexema, debug = False, with_tree_at_end = False, with_tree_debug = False):
+        raw_chain = container_chain_lexema
 
-        for chain in raw_chain: # Validando linea por linea
-            print("Validando: ", chain)
-            entry = chain.split()
+        in_ln = 1
+        for chain in raw_chain: # Validando line  a por linea
+            tree_for_this_chain = CATree()
+            context_for_this_chain = SemanticContext(self.error_tracker)
+
+            print(in_ln, ": ", end="")
+            for lexem in chain:
+                print(lexem.to_print(), " ", end="")
+
+            entry = chain
             stack = ["$"]
-            internal_tree = CATree()
 
             stack.append(self.non_terminals[0]) # Push estadoInicial
-            entry.append("$")
+            entry.append( lexema("$") )
 
-            tree_stack = []
+            #tree_stack = []
             while(entry and stack):
                 if debug:
                     print("Cadena: ", entry)
                     print("Entrada: ", stack)
 
-                if (stack[len(stack)-1] == entry[0]):
-                    #print("-->" + stack[len(stack)-1] + "<--" )
-                    internal_tree.insert(stack[len(stack)-1], [], with_tree_debug)
-                    tree_stack.append([ stack[len(stack)-1], [] ])
+                if (stack[len(stack)-1] == entry[0].first() ):  # FOR TERMINALS
+                    tree_for_this_chain.insert(stack[len(stack)-1], [], with_tree_debug, entry[0].second())
                     stack.pop()                                                         # Deleting last element
                     entry.pop(0)
                 else:
                     temp1 = stack.pop()                                                 # Getting and deleting last element
-                    temp2 = entry[0]
+                    temp2 = entry[0].first()
                     x_val = self.my_table.get_from_keys(temp1, temp2).split()
-                    #print("-->" + temp1, end="")
-                    #print(x_val, end="")
-                    #print("<--")
-                    internal_tree.insert(temp1, x_val.copy(), with_tree_debug)          # Copy() to avoid inmutable objetcs
-                    tree_stack.append( [ temp1, x_val.copy() ] )
-                    x_val.reverse()
 
+                    tree_for_this_chain.insert(temp1, x_val.copy(), with_tree_debug)          # Copy() to avoid inmutable objetcs
+                    x_val.reverse()
                     if x_val[0] == "ERROR":
                         break
 
@@ -431,23 +404,25 @@ class CATgrammar:
                         for x in x_val:
                             if x != self.empty_component:
                                 stack.append(x)
+            if(not stack and not entry): # Validacion perfecta
+                #tree_for_this_chain.draw_tree()
+                semantic_validation = E(tree_for_this_chain.root, context_for_this_chain, self.error_tracker)
+                semantic_validation.interprets()
+                if not context_for_this_chain.is_viable:
+                    print(" = identifier FOUNDED")
+                else:
+                    print(" = ",  context_for_this_chain.stack_content[0])
+                    final_eval = context_for_this_chain.stack_content[0]
+                    if final_eval < 0:
+                        self.error_tracker.add_warning(in_ln, 802)
+                    if final_eval > 65535:
+                        self.error_tracker.add_warning(in_ln, 803)
 
-            if(not stack and not entry):
-                print("\t Cadena aceptada")
-                if with_tree_at_end:
-                    print("\t Mostrando arbol")
-                    print()
-                    internal_tree.draw_tree()
-                    print()
-                    print()
-                return tree_stack
             else:
-                print("\t Cadena invalida")
-                if with_tree_at_end:
-                    print("\t No hay arbol que mostrar")
-                    print()
-                    print()
-                return []
+                self.error_tracker.add_warning(in_ln, 601)
+                print(" = UNKNOWM ")
+            in_ln+=1
+            #print()
 
 
     def print_dictionary(self):
@@ -538,25 +513,6 @@ class CATgrammar:
             #file.write("\t\tprint(\"" + "Interpreting from " + terminal + "\")\n\n\n")
         file.close()
 
-    def preparsing(self, statement):
-        statement = statement.replace(" ", "")
-
-        res = [re.findall(r'(\d+)(\++)?', statement)[:] ]
-
-        out = ""
-        for i in res[0]:
-            for j in range(2):
-                if i[j].isdigit():
-                    out += "num "
-                elif i[j].isalpha():
-                    out += "id "
-                else:
-                    out += i[j] + " "
-        print(statement, "->", out, "\n")
-        return out
-
-
-
     def __str__(self):
         print("CAT:/ Mostrando...")
 
@@ -588,34 +544,32 @@ T  := F Tp
 Tp := * F Tp  |  /  F Tp  | lambda
 F  := ( E ) | num | id
 """
-my_grammar = CATgrammar()
+
+global_error_manager = CATerror_manager()
+
+my_grammar = CATgrammar(global_error_manager)
 my_grammar.reader()           # Just type or paste the grammar
 my_grammar.process_grammar()  #  IN DEFAULT: process_grammar(component_separator=":=", right_component_separator="|")
                               #  Set according grammar separators
-print(my_grammar)
+print( my_grammar )
 my_grammar.fill_dictionary()  # Funcion para llenar diccionario
 
-# /// Interpreter stage /////////////////////////////////////////////
+# /// Lexical stage /////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////
-parsed_val = my_grammar.preparsing("13+1+12+ 1 +13 +14") # -- WARNING -- For now it only works with + :
-tree_stack = my_grammar.chain_validation(parsed_val)
-
-if len(tree_stack) == 0:
-    print("Error validando - No se puede continuar")
-    exit()
-
-my_grammar.create_classes_carpet();
 """
-try:
-    from PreParser import *
-except:
-    raise ImportError("No se pudo hallar la libreria de preparsemiento")
-
-contextObj = Context(parsed_val, "E")
-preParser = PreParser()
-for i in tree_stack:
-    print("Process: ", i[0], " ", end="")
-    print(i[1], " - ", end="")
-    print(contextObj.start_on)
-    contextObj = preParser.interprets(i[0], i[1], contextObj)
+1 + num
+5 - 9
+( 2 + 3 ) * ( 2 + 2 )
+( 3 * ) * 4
+3 * ( 4 * 5 )
+ 2 *4 +2 *2
+23 + 45 + 54 / 0
 """
+my_lexical = CATlexical_parser()
+my_lexical.read_chain()
+my_lexical.parser_symbols()
+
+lexema_container = my_lexical.get_parser_symbols() # An entry could contain several chains to validate.
+                                                   # This parser evaluates chain by chain and generats the tokens for each one. Vector with a vector of tokens
+my_grammar.chain_validation(lexema_container)
+global_error_manager.status_report()

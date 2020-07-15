@@ -1,0 +1,12 @@
+principal ( ) -> retorna num :
+  si id <= id entonces :
+    variable id = num ;
+  sino id entonces:
+    id = id;
+  sino id entonces:
+    variable ju = 220;
+  sino id entonces:
+    variable ju = 220;  
+  finalmente :
+    id = id ;
+  fin;

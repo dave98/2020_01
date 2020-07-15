@@ -13,11 +13,10 @@
 using namespace std;
 
 int main(){
-
   supervisor_symbol_table* global_table = new supervisor_symbol_table();
 
   CATlexical lexical_analizer(global_table);
-  lexical_analizer.set_doc_to_read("Test/CATprogram1.cat");
+  lexical_analizer.set_doc_to_read("Test/CATprogram4.cat");
   lexical_analizer.reader();
   vector<lexical_lexema*> lexemas_in = lexical_analizer.get_lexemas(); // lexical part returns lexemas founded
   //global_table->print();
@@ -31,12 +30,12 @@ int main(){
   sintatic_analizer.chain_validation("", false);
 
 
+
   sintatic_tree* temp_tree = sintatic_analizer.get_tree_for_semantics();
   CATsemantic semantic_analyzer(temp_tree);
-  semantic_analyzer.print_tree();
+  //semantic_analyzer.print_tree();
+  //semantic_analyzer.interpreter_evaluation();
   semantic_analyzer.generate_code();
-
-
   cout<<endl<<"Finished correctly"<<endl;
 
   return 0;

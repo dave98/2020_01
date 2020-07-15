@@ -19,9 +19,8 @@ COMPOUND_STMT -> mientras NEX entonces : ONLY_SSTMT fin
 COMPOUND_STMT -> para TPDEF considerando NEX entonces : ONLY_SSTMT fin
 
 IFEx2 -> sino NEX entonces : ONLY_SSTMT IFEx2
-IFEx2 -> IFEx3
-IFEx3 -> finalmente : ONLY_SSTMT
-IFEx3 -> lambda
+IFEx2 -> finalmente : ONLY_SSTMT
+IFEx2 -> lambda
 
 NEX -> NEX_T NEX_Ep
 NEX_Ep -> BComp NEX_T NEX_Ep
@@ -33,6 +32,7 @@ NEX_F -> ( NEX )
 NEX_F -> id
 
 TPDEF -> variable id TPDEF_SUB
+
 TPDEF_SUB -> , id TPDEF_SUB
 TPDEF_SUB -> EqualTo
 TPDEF_SUB -> lambda
@@ -40,9 +40,8 @@ TPDEF_SUB -> lambda
 DEFDEF ->  EqualTo
 DEFDEF ->  AAsig
 
-EqualTo -> SEqual OP_STMT
+EqualTo -> SEqual E
 
-OP_STMT -> E
 E -> T Ep
 Ep -> + T Ep
 Ep -> - T Ep
@@ -66,6 +65,8 @@ SComp -> <=
 SComp -> !=
 SComp -> ==
 SComp -> <>
+SComp -> <
+SComp -> >
 
 BComp -> yy
 BComp -> oo

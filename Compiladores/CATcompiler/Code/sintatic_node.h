@@ -17,7 +17,6 @@ public:
   int next_to_choose;
   sintatic_node* parent;
   vector<sintatic_node*> pointing_childs;
-
   lexical_lexema* lexema_to_semantic;
 
   sintatic_node(string, vector<string>, sintatic_node*, lexical_lexema*);
