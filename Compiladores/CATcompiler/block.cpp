@@ -9,9 +9,17 @@ using namespace std;
 
 void print(vector<int>&);
 void fill_vector(vector<int>&, int);
+void chain_p_string(string*);
 
 int main(){
+  string* st = new string("hola");
+
+  *st = "hola -> " + *st;
+
+  //chain_p_string(st);
+  cout<<*st<<endl;
 }
+
 
 
 
@@ -31,4 +39,8 @@ void print(vector<int>& input){
   for(unsigned int i = 0; i < input.size(); i++){
     cout<<i<<": "<<input[i]<<endl;
   }
+}
+
+void chain_p_string(string* str_incoming){
+  *str_incoming = "como estas";
 }

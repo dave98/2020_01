@@ -58,4 +58,12 @@ vector<string> homeless_reader(string path){
   return to_return;
 }
 
+
+bool is_float(string in_s){
+  for(unsigned int i = 0; i < in_s.size(); i++){
+    if(in_s[i] == '.'){return true;}
+  }
+  return false;
+}
+
 #endif

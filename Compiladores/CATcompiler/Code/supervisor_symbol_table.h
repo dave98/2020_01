@@ -7,17 +7,20 @@
 
 #include "symbol_table.h"
 #include "lexical_lexema.h"
+#include "CATerror_manager.h"
 
 class supervisor_symbol_table{
 public:
   int current_scope;
   symbol_table* root;
   symbol_table* actual;
+  CATerror_manager* global_error_manager;
 
-  supervisor_symbol_table();
+  supervisor_symbol_table(CATerror_manager*);
   ~supervisor_symbol_table();
 
   void add_new_identifier(lexical_lexema*);
+  bool is_new_identifier_in_table(lexical_lexema*);
   void create_new_symbol_table();
   int evaluate_scope(int);
   void go_back();
@@ -26,16 +29,26 @@ public:
   void print();
 };
 
-supervisor_symbol_table::supervisor_symbol_table(){
+supervisor_symbol_table::supervisor_symbol_table(CATerror_manager* error_incoming){
   this->current_scope = 0;
   this->root = new symbol_table(current_scope, NULL);
   this->actual = root;
+  this->global_error_manager = error_incoming;
 }
 
 supervisor_symbol_table::~supervisor_symbol_table(){}
 
 void supervisor_symbol_table::add_new_identifier(lexical_lexema* new_lexema){
   this->actual->add_new_identifier(new_lexema);
+}
+
+bool supervisor_symbol_table::is_new_identifier_in_table(lexical_lexema* new_lexema){
+  if(new_lexema->second() == ""){
+    this->global_error_manager->add_error(new_lexema->third(), 303);
+    //cout<<"Supervisor table got nothing to compair in symbol table"<<endl;
+  }
+  if(this->actual->is_identifier_in(new_lexema->second())){return true;}
+  else{return false;}
 }
 
 void supervisor_symbol_table::create_new_symbol_table(){
@@ -56,7 +69,10 @@ int supervisor_symbol_table::evaluate_scope(int in_scope){
 }
 
 void supervisor_symbol_table::go_back(){
-  if(!this->actual->parent){cout<<"Error: Tabla de simbolos - Raiz alcanzada."<<endl; return;}
+  if(!this->actual->parent){
+    this->global_error_manager->add_error(-1, 104);
+    return;
+  }
   else{
     this->current_scope--;
     this->actual = this->actual->parent;
@@ -66,19 +82,19 @@ void supervisor_symbol_table::go_back(){
 void supervisor_symbol_table::update_supervisor(int scope){
   int new_scope = this->evaluate_scope(scope);
   if(new_scope == 1){
-    cout<<"New table is being created."<<endl;
+    //cout<<"New table is being created."<<endl;
     this->create_new_symbol_table();
   }
   else if(new_scope == 0){
-    cout<<"Keeping the same table."<<endl;
+    //cout<<"Keeping the same table."<<endl;
     // Everything fine
   }
   else if(new_scope == -1){
-    cout<<"Go to previousn table."<<endl;
+    //cout<<"Go to previousn table."<<endl;
     this->go_back();
   }
   else{
-    cout<<"Error: Tabla de simbolos - Ambito descontinuado"<<endl;
+    this->global_error_manager->add_error(-1, 105);
   }
 }
 

@@ -6,6 +6,7 @@
 #include <string>
 
 #include "lexical_lexema.h"
+#include "symbol_table.h"
 
 using namespace std;
 
@@ -18,6 +19,7 @@ public:
   sintatic_node* parent;
   vector<sintatic_node*> pointing_childs;
   lexical_lexema* lexema_to_semantic;
+  symbol_table* lexema_table_location;
 
   sintatic_node(string, vector<string>, sintatic_node*, lexical_lexema*);
   ~sintatic_node();
@@ -37,6 +39,7 @@ sintatic_node::sintatic_node(string _etiqueta, vector<string> _explicit_childs, 
   this->pointing_childs = vector<sintatic_node*>(0, NULL);
 
   this->lexema_to_semantic = _lexema;
+  this->lexema_table_location = NULL;
 }
 
 sintatic_node::~sintatic_node(){}

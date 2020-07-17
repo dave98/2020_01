@@ -42,7 +42,7 @@ inline TerminalNode::~TerminalNode(){}
 
 inline void TerminalNode::interprets(){
   //*this->NTcontext->writer << this->NTnode->etiqueta<<endl;
-  cout<<"Look in: "<<this->NTnode->etiqueta<<endl;
+  //cout<<"Look in: "<<this->NTnode->etiqueta<<endl;
 
 }
 
@@ -70,7 +70,7 @@ inline void NonTerminalNode::interprets(){
     TerminalNode(this->NTnode, this->NTcontext).interprets();
   }
   else{
-    cout <<"Look for: " <<this->NTnode->etiqueta<< " :: ";
+    //cout <<"Look for: " <<this->NTnode->etiqueta<< " :: ";
     for(unsigned int i = 0; i < this->NTnode->pointing_childs.size(); i++){
       cout<<this->NTnode->pointing_childs[i]->etiqueta<<" ";
     }
@@ -648,7 +648,6 @@ inline void TPDEF::interprets(){
   else{ // Assuming pointing_childs[0] -> PRINCIPAL and pointing_childs[1] STMT
     variable(this->NTnode->pointing_childs[0], this->NTcontext).interprets();
     id(this->NTnode->pointing_childs[1], this->NTcontext).interprets();
-    cout<<"Is in"<<endl;
     TPDEF_SUB(this->NTnode->pointing_childs[2], this->NTcontext).interprets();
   }
 }
@@ -957,7 +956,7 @@ inline void finalmente::interprets(){
 }
 
 inline void variable::interprets(){
-  *this->NTcontext->writer << this->NTnode->etiqueta << " ";
+  *this->NTcontext->writer << this->NTnode->lexema_to_semantic->second() << " ";
 }
 
 inline void comma::interprets(){

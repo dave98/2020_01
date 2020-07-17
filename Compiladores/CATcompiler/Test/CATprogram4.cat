@@ -1,19 +1,15 @@
 principal()->retorna id:
-  para variable id considerando id <= id oo id == id entonces:
+  variable s1, s2, s3, s4 = 12;
+  variable eye, nose, hand = 10 + 102;
+  para variable eye2 = 10 considerando ( eye2 <= s1 ) entonces:
+    eye2 += 1;
   fin ;
-  id = id;
 
-
-  $ Comentrio letorio $
-  si id <= id entonces :
-
-    variable id = num ;
-  sino id entonces:
-    id = id;
-  sino id entonces:
-    variable ju = 220;
-  sino id entonces:
-    variable ju = 220;
+  $ Comentrio aleatorio $
+  si s1 < s2 entonces :
+    s1  = s2;
+  sino s1 > s2 entonces:
+    s1 = s3;
   finalmente :
-    id = id ;
+    s4 = 0 ;
   fin;

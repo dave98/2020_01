@@ -27,7 +27,6 @@ class CATerror_manager(object):
                               601 : "Sintatic -> Cadena invalida.",
                               801 : "Semantic -> El numero es demasiado grande",
                               802 : "Semantic -> El numero es negativo"
-
                             }
 
     def add_warning(self, _line, _code):

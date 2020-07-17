@@ -14,6 +14,7 @@
 #include "lexical_buffer.h"
 #include "lexical_lexema.h"
 #include "supervisor_symbol_table.h"
+#include "CATerror_manager.h"
 
 using namespace std;
 typedef void (*pfunc)();
@@ -36,7 +37,9 @@ public:
   bool lexical_state;
   string error_type;
 
-  CATlexical(supervisor_symbol_table*);
+  CATerror_manager* global_error_manager;
+
+  CATlexical(supervisor_symbol_table*, CATerror_manager*);
       void initialize_reserved_words();
       void initialize_operators();
   ~CATlexical();
@@ -83,16 +86,17 @@ public:
 
 };
 
-CATlexical::CATlexical(supervisor_symbol_table* _symbol_table_manager){
+CATlexical::CATlexical(supervisor_symbol_table* _symbol_table_manager, CATerror_manager* _incoming_error_manager){
   this->route_actual_doc = "";
   this->in_buffer = new lexical_buffer();
   this->symbol_table_manager = _symbol_table_manager;
   this->actual_line = 0;
   this->lexema_for_sintactic = vector<lexical_lexema*>(0, NULL);
-  this->re_word = regex("[a-zA-Z]+");
-  this->re_number = regex("[0-9][0-9]*(\\.[0-9]+)?");
+  this->re_word = regex("[a-zA-Z][a-zA-Z0-9\\_]*");
+  this->re_number = regex("[0-9][0-9]*(\\.[0-9]*)?");
   this->lexical_state = true;
   this->error_type = "";
+  this->global_error_manager = _incoming_error_manager;
   this->initialize_reserved_words();
   this->initialize_operators();
 }
@@ -133,15 +137,14 @@ void CATlexical::initialize_operators(){
   this->operators[","] =              bind(&CATlexical::puntuacion, this);
   this->operators[":"] =              bind(&CATlexical::puntuacion, this);
   this->operators[";"] =              bind(&CATlexical::puntuacion, this);
-
 }
 
-
-CATlexical::~CATlexical(){
-}
-
+CATlexical::~CATlexical(){}
 
 vector<lexical_lexema*> CATlexical::get_lexemas(){
+  if(this->lexema_for_sintactic.size() == 0){
+    this->global_error_manager->add_error(-1, 103);
+  }
   return this->lexema_for_sintactic;
 }
 
@@ -155,7 +158,7 @@ void CATlexical::reader(){
   if(!file_reader.is_open()){this->route_actual_doc = "";}
 
   if(this->route_actual_doc == ""){
-    cout<<"CAT: Ruta no especifica o inexistente"<<endl;
+    this->global_error_manager->add_error(-1, 101);
     return;
   }
   else{
@@ -173,7 +176,7 @@ void CATlexical::reader(){
     }
   }
 
-  cout<<endl<<"CAT: Lectura Satisfactoria"<<endl;
+  cout<<endl<<"CAT: Analisis lexico satisfactorio."<<endl;
 }
 
 // Funciona en base al apuntador ifstream: this->file_reader
@@ -489,7 +492,8 @@ void CATlexical::comentario(){
     comentario_deleted += beetwen_comentario;
 
     if(beetwen_comentario == '@'){
-      this->set_error("Comentario Inconcluso");
+      //this->set_error("Comentario Inconcluso");
+      this->global_error_manager->add_error(-1, 102);
       return;
     }
   }
@@ -607,7 +611,7 @@ void CATlexical::set_error(string _error = "Error desconocido"){
 }
 
 void CATlexical::report_error(){
-  cout<<"\tError lexico en linea del tipo: "<<this->error_type<<endl;
+  cout<<"Error lexico en linea del tipo: "<<this->error_type<<endl;
 }
 
 void CATlexical::print(){

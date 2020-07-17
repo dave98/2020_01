@@ -16,6 +16,7 @@
 #include "sintatic_table.h"
 #include "supervisor_symbol_table.h"
 #include "sintatic_tree.h"
+#include "CATerror_manager.h"
 
 using namespace std;
 
@@ -33,6 +34,7 @@ public:
 
   vector<lexical_lexema*> lexemas_to_process;
   supervisor_symbol_table* symbol_table_manager;
+  CATerror_manager* global_error_manager;
 
   string component_separator;      // Grammar characteristics
   string empty_component;
@@ -49,7 +51,7 @@ public:
 //**********************************************************************************************************************************************************//
   ///////////////////////////// FUNCTIONS PRE-SINTATIC /////////////////////////////////////////////////
   ///////////////////////////// used during chain validaqation ///////////////////////////////////////
-  CATsintatic(supervisor_symbol_table*, string = "->", string = "lambda");
+  CATsintatic(supervisor_symbol_table*, CATerror_manager*, string = "->", string = "lambda");
   ~CATsintatic();
   void set_grammar_to_read(string);
   void grammar_reader(); // Accept grammars with only one production in the right side. For multiple definitions, use multiples lines
@@ -85,7 +87,7 @@ public:
 
 };
 
-CATsintatic::CATsintatic(supervisor_symbol_table* _symbol_table_manager, string _componente_separator, string _empty_component){
+CATsintatic::CATsintatic(supervisor_symbol_table* _symbol_table_manager, CATerror_manager* _error_handler, string _componente_separator, string _empty_component){
   this->route_to_gramatica = "";
 
   this->terminals = vector<string>(0, "");
@@ -95,6 +97,7 @@ CATsintatic::CATsintatic(supervisor_symbol_table* _symbol_table_manager, string 
 
   this->lexemas_to_process = vector<lexical_lexema*>(0, NULL);
   this->symbol_table_manager = _symbol_table_manager;
+  this->global_error_manager = _error_handler;
 
   this->component_separator = _componente_separator;
   this->empty_component = _empty_component;
@@ -118,7 +121,7 @@ void CATsintatic::grammar_reader(){
   this->file_reader = ifstream(this->route_to_gramatica);
   if(!file_reader.is_open()){this->route_to_gramatica = "";}
   if(this->route_to_gramatica == ""){
-    cout<<"CAT: Ruta a la gramatica incorrecta"<<endl;
+    this->global_error_manager->add_error(-1, 201);
     return;
   }
   else{
@@ -126,7 +129,6 @@ void CATsintatic::grammar_reader(){
     while(true){
       current_statement = this->grammar_reader_helper();
       if(current_statement != "eof"){
-        //cout<<"Insertando linea: "<<current_statement<<endl;
         this->grammar_construction(current_statement);
       }
       else{
@@ -135,7 +137,7 @@ void CATsintatic::grammar_reader(){
     }
     this->_get_terminals_and_non_terminals();
   }
-  cout<<endl<<"CAT//: Gramatica completa"<<endl;
+  cout<<"CAT: Lectura de la gramática completa."<<endl;
 }
 
 string CATsintatic::grammar_reader_helper(){
@@ -160,7 +162,6 @@ void CATsintatic::grammar_construction(string grammar_line){
   else{ // Otherwise we just append production with the same initializer
     this->productions.at(splitted_line[0]).push_back(vector<string>{vector<string>(splitted_line.begin()+2, splitted_line.end())});
   }
-
   //Defining root production. Works only once.
   if(!this->grammar_root.size()){
     this->grammar_root = splitted_line[0];
@@ -191,7 +192,8 @@ vector<string> CATsintatic::get_primeros(string not_terminal, int n_recursive, b
     return vector<string>{not_terminal};
   }
   else if(this->productions.find(not_terminal) == this->productions.end() ){
-    this->set_error("En primeros: " + not_terminal + " no existe.");
+    //this->set_error("En primeros: " + not_terminal + " no existe.");
+    this->global_error_manager->add_error(-1, 202);
     return vector<string>{};
   }
   else{
@@ -201,12 +203,8 @@ vector<string> CATsintatic::get_primeros(string not_terminal, int n_recursive, b
       unsigned int start_on = 0;
 
       if(candidates_to_first[start_on] == not_terminal){ /*WARNING: Woul better just to report cases of left recursion*/
-        /*while(candidates_to_first[start_on] == not_terminal){start_on++;}
-        if(start_on >= candidates_to_first.size()){
-          this->set_error("En primeros: Recursion por la izquierda inevitable.");
-          return vector<string>{};
-        }*/
-        this->set_error("En primeros: Recursion por la izquierda inevitable -> " + not_terminal + " - " + candidates_to_first[start_on]);
+        //this->set_error("En primeros: Recursion por la izquierda inevitable -> " + not_terminal + " - " + candidates_to_first[start_on]);
+        this->global_error_manager->add_error(-1, 203);
         return vector<string>{};
       }
 
@@ -241,7 +239,8 @@ vector<string> CATsintatic::get_siguientes(string not_terminal){
     return vector<string>{not_terminal};
   }
   else if(this->productions.find(not_terminal) == this->productions.end() ){
-    this->set_error("En siguientes: " + not_terminal + " no existe.");
+    //this->set_error("En siguientes: " + not_terminal + " no existe.");
+    this->global_error_manager->add_error(-1, 204);
     return vector<string>{};
   }
   else{
@@ -300,13 +299,13 @@ void CATsintatic::fill_dictionary(){
       }
     }
   }
+  cout<<"CAT: Se ha completado la creacion de la tabla lexica."<<endl;
 }
 
 // NTnode: NoTerminals, TNode: Terminals <- Otherwise it will raise an error.
 vector<string> CATsintatic::get_production(string NTnode, string Tnode){
   int index_best_candidates = -1;
   int best_weight = 1000;
-
 
   for(unsigned int i = 0; i < this->productions.at(NTnode).size(); i++){
     vector<string> candidates = this->productions.at(NTnode)[i];
@@ -373,7 +372,8 @@ void CATsintatic::chain_validation(string route, bool debug){
   }
   else{ // Means we gonna work with lexical component
     if(this->lexemas_to_process.empty()){
-      this->set_error("Sin lexemas que procesar");
+      this->global_error_manager->add_error(-1, 205);
+      //this->set_error("Sin lexemas que procesar");
     }
     else{
       this->chain_validation_pure(this->lexemas_to_process, debug);
@@ -392,10 +392,6 @@ void CATsintatic::chain_validation_pure(vector<lexical_lexema*> entry_lexemas, b
       cout<<"\tstack: "; print_vector(stack); cout<<endl;
       cout<<"\tentry: "; for(unsigned int i = 0; i < entry_lexemas.size(); i++){cout<<entry_lexemas[i]->first()<<" ";} cout<<endl;
     }
-    /**/
-    //if(stack.back() == "TPDEF"){
-    //  cout<<"PIR_IN: "<<stack.back()<<" - "<<entry_lexemas.front()->first()<<endl;
-    //}
     if(stack.back() == entry_lexemas.front()->first() ){
       this->inner_tree->insert(stack.back(), vector<string>{}, entry_lexemas.front() ,debug); //// TREE CONFIGURATION
 
@@ -408,7 +404,6 @@ void CATsintatic::chain_validation_pure(vector<lexical_lexema*> entry_lexemas, b
       vector<string> in_production = this->my_table->get(stack_back, entry_front, false);
 
       this->inner_tree->insert(stack_back, in_production, entry_lexemas.front() ,debug);
-
       std::reverse(in_production.begin(), in_production.end());
 
       if(in_production.empty()){
@@ -425,10 +420,11 @@ void CATsintatic::chain_validation_pure(vector<lexical_lexema*> entry_lexemas, b
   }
 
   if(stack.empty() && entry_lexemas.empty()){
-    cout<<"Cadena aceptada"<<endl<<endl;
+    cout<<"CAT: El programa ha sido aceptado."<<endl;
   }
   else{
-    cout<<"Cadena invalida"<<endl<<endl;
+    cout<<"CAT: El programa ha fallado su validacion."<<endl;
+    this->global_error_manager->add_error(-1, 206);
   }
 }
 
@@ -451,7 +447,8 @@ sintatic_tree* CATsintatic::get_tree_for_semantics(){
     return this->inner_tree;
   }
   else{
-    cout<<"Error: Este arbol no esta listo para el analisis semantico"<<endl;
+    //cout<<"Error: Este arbol no esta listo para el analisis semantico"<<endl;
+    this->global_error_manager->add_error(-1, 207);
     return NULL;
   }
 }

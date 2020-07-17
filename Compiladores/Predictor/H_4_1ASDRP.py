@@ -6,7 +6,6 @@ GRAMMAR READER
 
 import os
 import re
-from AbstractExpression import *
 from CATlexical_parser import *
 from CATerror_manager import *
 from CATsemantic import *
@@ -366,6 +365,7 @@ class CATgrammar:
         raw_chain = container_chain_lexema
 
         in_ln = 1
+        in_string = ""
         for chain in raw_chain: # Validando line  a por linea
             tree_for_this_chain = CATree()
             context_for_this_chain = SemanticContext(self.error_tracker)
@@ -382,6 +382,7 @@ class CATgrammar:
 
             #tree_stack = []
             while(entry and stack):
+                in_string = entry[0].first()
                 if debug:
                     print("Cadena: ", entry)
                     print("Entrada: ", stack)
@@ -420,7 +421,7 @@ class CATgrammar:
 
             else:
                 self.error_tracker.add_warning(in_ln, 601)
-                print(" = UNKNOWM ")
+                print(" = UNKNOW ( ->",  in_string ,"<- no se admite en cadena )")
             in_ln+=1
             #print()
 
@@ -557,13 +558,9 @@ my_grammar.fill_dictionary()  # Funcion para llenar diccionario
 # /// Lexical stage /////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////
 """
-1 + num
-5 - 9
-( 2 + 3 ) * ( 2 + 2 )
-( 3 * ) * 4
-3 * ( 4 * 5 )
- 2 *4 +2 *2
-23 + 45 + 54 / 0
+5 - 9 + 6 -4
+(3 * 2) + 4
+( 4 ) * ( 5 )
 """
 my_lexical = CATlexical_parser()
 my_lexical.read_chain()
