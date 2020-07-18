@@ -10,6 +10,7 @@ public:
   string patron;
   string descripcion;
   int line;
+  string type;
 
   lexical_lexema(string);
   lexical_lexema(string, string);
@@ -27,6 +28,7 @@ lexical_lexema::lexical_lexema(string _patron){
   this->patron = _patron;
   this->descripcion = "";
   this->line = -1;
+  this->type = "";
 }
 
 
@@ -34,6 +36,8 @@ lexical_lexema::lexical_lexema(string _patron, string _descripcion){
   this->patron = _patron;
   this->descripcion = _descripcion;
   this->line = -1;
+  this->type = "";
+
 }
 
 
@@ -41,6 +45,7 @@ lexical_lexema::lexical_lexema(string _patron, string _descripcion, int _line){
   this->patron = _patron;
   this->descripcion = _descripcion;
   this->line = _line;
+  this->type = "";
 }
 
 lexical_lexema::~lexical_lexema(){

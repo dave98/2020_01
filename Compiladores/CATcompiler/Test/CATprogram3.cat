@@ -1,4 +1,6 @@
 principal ( ) -> retorna num :
+  $Este programa ha sido creado para fallar$ 
+
   si id <= id entonces :
     variable id = num ;
   sino id entonces:
@@ -6,7 +8,7 @@ principal ( ) -> retorna num :
   sino id entonces:
     variable ju = 220;
   sino id entonces:
-    variable ju = 220;  
+    variable ju = 220;
   finalmente :
     id = id ;
   fin;

@@ -1,4 +1,5 @@
 principal ( ) -> retorna primer :
+  $Evaluacion de condicional if extendido$
 
   variable primer = 29;
   variable segundo = 809;

@@ -27,6 +27,8 @@ public:
   void update_supervisor(int);
 
   void print();
+  void associate_with_type(string, string); //Link a identifier with its type
+  string get_type(string); //Link a identifier with its type
 };
 
 supervisor_symbol_table::supervisor_symbol_table(CATerror_manager* error_incoming){
@@ -102,9 +104,16 @@ void supervisor_symbol_table::print(){
   this->root->print();
 }
 
+void supervisor_symbol_table::associate_with_type(string _identifier, string _types){
+  if(!this->actual->associate_with_type(_identifier, _types)){
+    this->global_error_manager->add_error(-1, 306);
+  }
+}
 
 
-
+string supervisor_symbol_table::get_type(string _identifier){
+  return this->actual->get_type(_identifier);
+}
 
 
 

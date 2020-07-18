@@ -12,12 +12,8 @@ void fill_vector(vector<int>&, int);
 void chain_p_string(string*);
 
 int main(){
-  string* st = new string("hola");
+  cout<<"\"Hi\""<<endl;
 
-  *st = "hola -> " + *st;
-
-  //chain_p_string(st);
-  cout<<*st<<endl;
 }
 
 

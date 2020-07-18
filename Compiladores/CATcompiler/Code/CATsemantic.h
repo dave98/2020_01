@@ -35,13 +35,14 @@ public:
   void interpreter_evaluation();
   void generate_code();
 
-
   void symbol_verification(); // Interface
     void symbol_verification_navigator(sintatic_node*);
 
   void type_eval();
     void type_eval_navigator(sintatic_node*);
-    void type_eval_get_type(sintatic_node*, string*);
+    void type_eval_get_type_tpdef(sintatic_node*, string*);
+    void type_eval_get_type_defdef(sintatic_node*, string*);
+    void type_eval_set_type_tpdef(sintatic_node* in_node, string* inherited_type);
 };
 
 // At this we got something in tree -> Tree is not empty
@@ -78,6 +79,7 @@ void CATsemantic::generate_code(){
   *this->writer << "using namespace std;"<<endl<<endl;
 
   this->interpreter_evaluation();
+  cout<<"CAT: Generacion completa de codigo"<<endl;
 }
 
 // Symbol verification
@@ -91,40 +93,35 @@ void CATsemantic::symbol_verification_navigator(sintatic_node* in_node){
       if(this->semantic_symbol_table->is_new_identifier_in_table(in_node->lexema_to_semantic)){
         this->global_error_manager->add_error(in_node->lexema_to_semantic->third(), 301);
       }else{
-        //cout<<"Adding variable: "<<in_node->lexema_to_semantic->second()<<endl;
         this->semantic_symbol_table->add_new_identifier(in_node->lexema_to_semantic);
+        in_node->lexema_table_location = this->semantic_symbol_table->actual;
       }
     }
     else if(in_node->parent->etiqueta == "TPDEF_SUB"){
       if(this->semantic_symbol_table->is_new_identifier_in_table(in_node->lexema_to_semantic)){
         this->global_error_manager->add_error(in_node->lexema_to_semantic->third(), 301);
       }else{
-        //cout<<"Adding variable multiples: "<<in_node->lexema_to_semantic->second()<<endl;
         this->semantic_symbol_table->add_new_identifier(in_node->lexema_to_semantic);
+        in_node->lexema_table_location = this->semantic_symbol_table->actual;
       }
     }
     else if(in_node->parent->parent->etiqueta == "PRINCIPAL"){
-      //cout<<"RETURN VALUE FOUNDED"<<endl;
     }
     else{
       if( ! this->semantic_symbol_table->is_new_identifier_in_table(in_node->lexema_to_semantic)){
         this->global_error_manager->add_error(in_node->lexema_to_semantic->third(), 302);
-        //cout<<"Identicador en tabla: "<<in_node->lexema_to_semantic->second()<<endl;
+      }
+      else{
+        in_node->lexema_table_location = this->semantic_symbol_table->actual;
       }
     }
   }
   else if(in_node->etiqueta == "COMPOUND_STMT"){
     this->semantic_symbol_table->create_new_symbol_table();
-    //cout<<in_node->pointing_childs[0]->etiqueta<<endl;
-    //cout<<"New table created"<<endl;
   }
   else if(in_node->etiqueta == "fin"){
     this->semantic_symbol_table->go_back();
-    //cout<<"New table closed"<<endl;
   }
-
-
-
   for(unsigned int i = 0; i < in_node->pointing_childs.size(); i++){
     this->symbol_verification_navigator(in_node->pointing_childs[i]);
   }
@@ -138,12 +135,24 @@ void CATsemantic::type_eval(){ // Interface
 
 void CATsemantic::type_eval_navigator(sintatic_node* in_node){ // Tree navigator
   if(in_node->etiqueta == "TPDEF"){
-    string* type_for_branch = new string("string");
-    // Back shall be TPDEF_SUB
-    this->type_eval_get_type(in_node->pointing_childs.back(), type_for_branch);
-    //cout<<"Type gone from string to "<<*type_for_branch<<endl;
-    // Front shall be variable;
-    in_node->pointing_childs.front()->lexema_to_semantic->descripcion = *type_for_branch;
+    string* type_for_branch = new string("none");
+    this->type_eval_get_type_tpdef(in_node->pointing_childs.back(), type_for_branch);
+
+    if(*type_for_branch == "str"){ in_node->pointing_childs.front()->lexema_to_semantic->descripcion = "string";}
+    else{ in_node->pointing_childs.front()->lexema_to_semantic->descripcion = *type_for_branch;}
+
+    this->type_eval_set_type_tpdef(in_node->pointing_childs[1], type_for_branch);
+    this->type_eval_set_type_tpdef(in_node->pointing_childs[2], type_for_branch);
+    delete type_for_branch;
+    return;
+  }
+
+  else if(in_node->etiqueta == "DEFDEF"){
+    string* type_for_branch_2 = new string("none");
+    for(unsigned int i = 0; i < in_node->pointing_childs.size(); i++){
+      this->type_eval_get_type_defdef(in_node->pointing_childs[i], type_for_branch_2);
+    }
+    delete type_for_branch_2;
     return;
   }
   else{
@@ -154,8 +163,11 @@ void CATsemantic::type_eval_navigator(sintatic_node* in_node){ // Tree navigator
 }
 
 //TPDEF_SUB evaluator
-void CATsemantic::type_eval_get_type(sintatic_node* in_node, string* inherited_type){ // Type evaluator
+void CATsemantic::type_eval_get_type_tpdef(sintatic_node* in_node, string* inherited_type){ // Type evaluator
   if(in_node->etiqueta == "num"){
+    if(*inherited_type == "str"){
+      this->global_error_manager->add_error(-1,304);
+    }
     if( is_float( in_node->lexema_to_semantic->second() )   ){
       *inherited_type = "float";
     }
@@ -166,10 +178,96 @@ void CATsemantic::type_eval_get_type(sintatic_node* in_node, string* inherited_t
     }
     return;
   }
+  else if(in_node->etiqueta == "str"){
+    if(*inherited_type == "int" || *inherited_type == "float"){
+      this->global_error_manager->add_error(-1,304);
+    }
+    else{
+      *inherited_type = "str";
+    }
+  }
+  else if(in_node->etiqueta == "id"){
+    //cout<<"TO: "<<in_node->etiqueta<<" - "<<in_node->lexema_to_semantic->second()<<" - "<<in_node->lexema_to_semantic->type<<endl;
+    string temp_type = "";
+    temp_type = in_node->lexema_table_location->get_type(in_node->lexema_to_semantic->second());
+    if(temp_type == "int" || temp_type == "float" ){
+      if(*inherited_type == "str"){
+        this->global_error_manager->add_error(-1,304);
+      }
+      else{*inherited_type = temp_type;}
+      return;
+    }
+    else if(temp_type == "str"){
+      if(*inherited_type == "int" || *inherited_type == "float"){
+        this->global_error_manager->add_error(-1,304);
+      }
+      else{
+        *inherited_type = "str";
+      }
+    }
+  }
+
   for(unsigned int i = 0; i < in_node->pointing_childs.size(); i++){
-    this->type_eval_get_type(in_node->pointing_childs[i], inherited_type);
+    this->type_eval_get_type_tpdef(in_node->pointing_childs[i], inherited_type);
   }
   return;
+}
+
+void CATsemantic::type_eval_set_type_tpdef(sintatic_node* in_node, string* inherited_type){
+  if(in_node->etiqueta == "id" && (in_node->parent->etiqueta == "TPDEF" || in_node->parent->etiqueta == "TPDEF_SUB" )   ){
+    in_node->lexema_table_location->associate_with_type(in_node->lexema_to_semantic->second(), *inherited_type);
+    in_node->lexema_to_semantic->type = *inherited_type;
+  return;
+  }
+  for(unsigned int i = 0; i < in_node->pointing_childs.size(); i++){
+    this->type_eval_set_type_tpdef(in_node->pointing_childs[i], inherited_type);
+  }
+  return;
+}
+
+void CATsemantic::type_eval_get_type_defdef(sintatic_node* in_node, string* inherited_type){ // Type evaluator
+  //cout<<"INNODE->E: "<<in_node->etiqueta<<endl;
+  if(in_node->etiqueta == "num"){
+    if(*inherited_type == "str"){
+      this->global_error_manager->add_error(-1,304);
+    }
+    else{ *inherited_type = "num"; }
+  }
+  else if(in_node->etiqueta == "str"){
+    if(*inherited_type == "num"){
+      this->global_error_manager->add_error(-1,304);
+    }
+    else{ *inherited_type = "str"; }
+  }
+  else if(in_node->etiqueta == "id"){
+    string temp_type = "";
+    temp_type = in_node->lexema_table_location->get_type(in_node->lexema_to_semantic->second());
+    if(temp_type == ""){this->global_error_manager->add_error(-1, 305);}
+    else{
+      if(temp_type == "int" || temp_type == "float" ){
+        if(*inherited_type == "str"){
+          this->global_error_manager->add_error(-1,304);
+        }
+        else if(*inherited_type == "num"){}
+        else{*inherited_type = temp_type;}
+        return;
+      }
+
+      else if(temp_type == "str"){
+        if(*inherited_type == "int" || *inherited_type == "float" || * inherited_type == "num"){
+          this->global_error_manager->add_error(-1,304);
+        }
+        else{
+          *inherited_type = "str";
+        }
+      }
+    }
+  }
+
+  for(unsigned int i = 0; i < in_node->pointing_childs.size(); i++){
+    this->type_eval_get_type_defdef(in_node->pointing_childs[i], inherited_type);
+  }
+
 }
 
 

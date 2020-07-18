@@ -3,7 +3,7 @@ principal() -> retorna 0:
   variable a = 10;
   variable b = 5;
   variable c = b;
-  variable farenheit , celsius ;
+  variable farenheit , celsius = 0;
   variable inferior , superior , salto  = 100 ; $ Comentando de manera aleatoria $
 
   inferior = 0 ;
@@ -14,9 +14,8 @@ principal() -> retorna 0:
 
   si celsius < farenheit entonces:  $ Comentando de aleatorimente $
     celsius = 7 / 2 ;
-  sino si celsius == farenheit entonces:
+  sino celsius == farenheit entonces:
     celsius = celsius - 10;
-  sino entonces:
+  finalmente:
     celsius = 0;
-
-  retorna
+  fin;

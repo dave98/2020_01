@@ -137,7 +137,7 @@ void CATsintatic::grammar_reader(){
     }
     this->_get_terminals_and_non_terminals();
   }
-  cout<<"CAT: Lectura de la gramática completa."<<endl;
+  cout<<"CAT: Lectura de la gramatica completa."<<endl;
 }
 
 string CATsintatic::grammar_reader_helper(){

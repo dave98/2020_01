@@ -50,6 +50,7 @@ void CATerror_manager::initialize_errors(){
   this->error_dict[103] = "Lexical: No hay lexemas que retornar.";
   this->error_dict[104] = "Lexical: La tabla de simbolos ha sobrepasado la raiz.";
   this->error_dict[105] = "Lexical: Error de ambito.";
+  this->error_dict[106] = "Lexical: Una cadena no ha sido concluida.";
   this->error_dict[201] = "Sintatic: No existe el archivo descrito para la gramatica.";
   this->error_dict[202] = "Sintatic: Se ha realizado una peticion de GetPrimero inadecuada.";
   this->error_dict[203] = "Sintatic: Se ha descubierto una recursion por la izquierda en la gramatica.";
@@ -60,6 +61,9 @@ void CATerror_manager::initialize_errors(){
   this->error_dict[301] = "Semantic: La variable ha sido declarada dos veces.";
   this->error_dict[302] = "Semantic: Un identicador no ha sido declarado.";
   this->error_dict[303] = "Semantic: El supervisor de simbolos ha encontrado una excepcion.";
+  this->error_dict[304] = "Semantic: No se puede juntar estos tipos.";
+  this->error_dict[305] = "Semantic: Me tope con un identicador sin tipo.";
+  this->error_dict[306] = "Semantic: No se puedo asociar el tipo a un identicador.";
 
 }
 
