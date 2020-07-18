@@ -12,12 +12,11 @@
 #include "code/sintatic_tree.h"
 using namespace std;
 
-//global_error_manager->add_warning(12, 501);
-
 int main(){
   CATerror_manager* global_error_manager = new CATerror_manager();
   supervisor_symbol_table* global_table = new supervisor_symbol_table(global_error_manager);
 
+  // Lexicaal Segment
   CATlexical lexical_analizer(global_table, global_error_manager);
 
   //----------------------------------- COLOCAR AQUI EL NOMBRE DEL ARCHIVO CON CODIGO CAT -----------------------------------------------------------------
@@ -28,6 +27,7 @@ int main(){
   vector<lexical_lexema*> lexemas_in = lexical_analizer.get_lexemas(); // lexical part returns lexemas founded
 
 
+  // Sintatic Segment
   CATsintatic sintatic_analizer(global_table, global_error_manager);
   sintatic_analizer.set_grammar_to_read("Test/CATgrammar.gcat"); // No modificar, gramatica asociada
   sintatic_analizer.grammar_reader();
@@ -36,7 +36,7 @@ int main(){
   sintatic_analizer.chain_validation("", false);
 
 
-
+  // Semantic Segment
   sintatic_tree* temp_tree = sintatic_analizer.get_tree_for_semantics();
   CATsemantic semantic_analyzer(temp_tree, global_error_manager);
   //semantic_analyzer.print_tree(); // Imprimir arbol sintactico
