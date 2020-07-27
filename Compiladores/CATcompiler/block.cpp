@@ -12,12 +12,10 @@ void fill_vector(vector<int>&, int);
 void chain_p_string(string*);
 
 int main(){
-  string* st = new string("hola");
-
-  *st = "hola -> " + *st;
-
-  //chain_p_string(st);
-  cout<<*st<<endl;
+  int a = 0;
+  void get_some(){
+    a = a+1;
+  }
 }
 
 

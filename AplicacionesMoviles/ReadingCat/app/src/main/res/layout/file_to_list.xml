@@ -31,6 +31,4 @@
         android:paddingRight="2dp"
         android:paddingBottom="20dp"
         android:src="@drawable/ic_garbage" />
-
-
 </LinearLayout>
