@@ -29,7 +29,7 @@ NEX_T -> NEX_F NEX_Tp
 NEX_Tp -> SComp NEX_F NEX_Tp
 NEX_Tp -> lambda
 NEX_F -> ( NEX )
-NEX_F -> id
+NEX_F -> Atom
 
 TPDEF -> variable id TPDEF_SUB
 
@@ -73,3 +73,4 @@ BComp -> oo
 
 Atom -> num
 Atom -> id
+Atom -> str

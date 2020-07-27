@@ -1,12 +1,19 @@
 principal ( ) -> retorna a :
-  variable aer = 112;
-  si ( b <= c ) oo d entonces :
-    e = f ;
-    g = h + 1213 ;
-  sino i <= j entonces :
-    variable k ;
+
+  $Notese la asignacion automatica de tipos$
+
+  variable e_2 = "hellow";
+  variable e_3 = "hi";
+  variable e_4 = e_3 + e_2 + "hellos";
+
+  $comentario indiscreto$
+  para variable i = 0 considerando i < 450 entonces:
+    i = i + 1;
   fin;
 
+  variable i_2 = 23;
+  variable i_3 = 24;
+  variable i_5 = 47.7;
 
-
-  variable x, y, z, zertu = 2003;
+  i_2 = i_3+ i_5;
+  variable jfin = i_2;

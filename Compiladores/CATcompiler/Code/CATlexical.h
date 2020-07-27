@@ -79,6 +79,7 @@ public:
         void empty();
         void comentario();
         void puntuacion();
+        void chain();
   bool continue_evaluation();
   void set_error(string);
   void report_error();
@@ -137,6 +138,7 @@ void CATlexical::initialize_operators(){
   this->operators[","] =              bind(&CATlexical::puntuacion, this);
   this->operators[":"] =              bind(&CATlexical::puntuacion, this);
   this->operators[";"] =              bind(&CATlexical::puntuacion, this);
+  this->operators["\""] =             bind(&CATlexical::chain, this);
 }
 
 CATlexical::~CATlexical(){}
@@ -151,7 +153,6 @@ vector<lexical_lexema*> CATlexical::get_lexemas(){
 void CATlexical::set_doc_to_read(string new_route){
   this->route_actual_doc = new_route;
 }
-
 
 void CATlexical::reader(){
   this->file_reader = ifstream(this->route_actual_doc);
@@ -500,6 +501,29 @@ void CATlexical::comentario(){
 
   cout<<"Comentario: "<<comentario_deleted<<endl;
   return;
+}
+
+void CATlexical::chain(){
+  string chain_got = "";
+
+  char beetwen_str = this->in_buffer->get_next();
+  chain_got += beetwen_str;
+
+  while(beetwen_str != '\"'){
+    beetwen_str = this->in_buffer->get_next();
+    chain_got += beetwen_str;
+
+    if(beetwen_str == '@'){
+      //this->set_error("Comentario Inconcluso");
+      this->global_error_manager->add_error(-1, 106);
+      return;
+    }
+  }
+  chain_got = "\"" + chain_got;
+  lexical_lexema* new_lexema = new lexical_lexema("str", chain_got);
+  this->lexema_for_sintactic.push_back(new_lexema);
+  return;
+
 }
 
 void CATlexical::empty(){

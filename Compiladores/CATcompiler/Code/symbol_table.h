@@ -23,6 +23,9 @@ public:
   bool is_identifier_in(string);
   void add_new_identifier(lexical_lexema*); // Be added only if its the first time in THIS table
 
+  bool associate_with_type(string, string);
+  string get_type(string);
+
   void print(int = 0);
 };
 
@@ -43,6 +46,28 @@ bool symbol_table::is_identifier_in(string identifier){
   else{ return false; }
 }
 
+bool symbol_table::associate_with_type(string _identifier, string _type){
+  if(this->tokens_in_enviroment.find(_identifier) != this->tokens_in_enviroment.end()){
+    this->tokens_in_enviroment.at(_identifier)->type = _type;
+    return true;
+  }
+  else{
+    cout<<"No existe el simbolo solicitado para asociar tipos"<<endl;
+    return false;
+  }
+}
+
+
+string symbol_table::get_type(string _identifier){
+  if(this->tokens_in_enviroment.find(_identifier) != this->tokens_in_enviroment.end()){
+    return this->tokens_in_enviroment.at(_identifier)->type;
+  }
+  else{
+    cout<<"No existe el simbolo solicitado para extraer tipos"<<endl;
+    return "";
+  }
+
+}
 // Identifier lexemas has the following structure -> lexemas<id, description>
 void symbol_table::add_new_identifier(lexical_lexema* new_lexema){
   if(!this->is_identifier_in(new_lexema->second())){

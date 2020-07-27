@@ -1,6 +1,10 @@
 principal ( )->  retorna num:
-  mientras id <= id entonces :
-    variable id = 5;
-  fin;
+$ Comentario aleatorio $
+  variable s_2 = "bus";
+  variable s_3 = 4;
+  variable s_4 = 3.5;
 
-  variable id = 456 ;
+  s_3 = 20 +3 + s_4; $En ln 7 los tipos corresponden, por ende no hay error$
+
+  variable cadena_1 = "carro";
+  cadena_1 = cadena_1 + s_3 + s_4; $En ln 10 se produce un error de tipos$

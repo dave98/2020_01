@@ -629,7 +629,7 @@ inline void NEX_F::interprets(){
       right_par(this->NTnode->pointing_childs[2], this->NTcontext).interprets();
     }
     else{
-      id(this->NTnode->pointing_childs[0], this->NTcontext).interprets();
+      Atom(this->NTnode->pointing_childs[0], this->NTcontext).interprets();
     }
   }
 }
