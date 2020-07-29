@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import static com.dave.readingcat.Dashboard.enviroments_books;
+import static com.dave.readingcat.Dashboard.last_read_stack;
 
 public class FragmentNotifications extends Fragment {
     AdapterNotification adapterNotification;
@@ -90,6 +91,27 @@ public class FragmentNotifications extends Fragment {
         editor.apply();
     }
 
+    private void SaveLastReadData(){
+        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences("shared_preferences", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(last_read_stack);
+        editor.putString("lastread_list", json);
+        editor.apply();
+    }
+
+    private void AddToLastRead(View v){
+        // A last read solo añadire una copia BARATA del articulo leido
+        int index = last_read_stack.indexOf(notificationsSharedPref.get(recyclerViewNotifications.getChildAdapterPosition(v)));
+        if(index != -1){ //Si esta en el stack de last_read
+            Collections.swap(last_read_stack, index, 0);
+        }
+        else{
+            last_read_stack.add(0, notificationsSharedPref.get(recyclerViewNotifications.getChildAdapterPosition(v)));
+        }
+        SaveLastReadData();
+    }
+
     private void AddToFavorite(View v){
         if(notificationsSharedPref.get(recyclerViewNotifications.getChildAdapterPosition(v)).getIs_favorite()){
             notificationsSharedPref.get(recyclerViewNotifications.getChildAdapterPosition(v)).setIs_favorite(false);
@@ -115,7 +137,6 @@ public class FragmentNotifications extends Fragment {
             }
             else{ Toast.makeText(v.getContext(), "Error de sincronización en capa bilineal", Toast.LENGTH_SHORT).show(); }
         }
-
     }
 
     private void DeleteFromNotification(View v){
@@ -155,6 +176,14 @@ public class FragmentNotifications extends Fragment {
                 enviroments_books.get(index).setIs_synch(false);
                 enviroments_books.get(index).setIs_favorite(false);
                 SaveData();
+
+                // LastReadStack puede contener una referencia a este dato, es necesario quitarlo
+                int index_for_last = last_read_stack.indexOf(notificationsSharedPref.get(recyclerViewNotifications.getChildAdapterPosition(v)));
+                if(index_for_last != -1){
+                    last_read_stack.remove(index_for_last);
+                    SaveLastReadData();
+                }
+
             }
             else{ Toast.makeText(v.getContext(), "Error de sincronización en capa bilineal", Toast.LENGTH_SHORT).show(); }
 
@@ -170,7 +199,7 @@ public class FragmentNotifications extends Fragment {
         String book_path = notificationsSharedPref.get(recyclerViewNotifications.getChildAdapterPosition(v)).getArticle_path();
         String book_name = (new File(book_path)).getName();
 
-        //AddToLastRead(allBookSharedPref.get(recyclerViewAllBook.getChildAdapterPosition(v)));
+        AddToLastRead(v);
 
         Intent intent = new Intent(getActivity(), Viewer_pdf.class);
         intent.putExtra("BOOK_NAME", book_name);
@@ -178,28 +207,4 @@ public class FragmentNotifications extends Fragment {
         startActivity(intent);
     }
 
-    private void AddToLastRead(Article new_article){ // WARNING: Inefficient implementation - Fast prototype
-        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences("shared_preferences", Context.MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json_lastread = sharedPreferences.getString("lastread_list", null);
-        Type type = new TypeToken<ArrayList<Article>>(){}.getType();
-        ArrayList<Article> tempLastRead = gson.fromJson(json_lastread, type);
-
-        if(tempLastRead == null){
-            tempLastRead = new ArrayList<>();
-        }
-
-        int is_article_listed = tempLastRead.indexOf(new_article);
-        if(is_article_listed != -1){
-            Collections.swap(tempLastRead, is_article_listed, 0);
-        }
-        else {
-            tempLastRead.add(0, new_article);
-        }
-
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        String json = gson.toJson(tempLastRead);
-        editor.putString("lastread_list", json);
-        editor.apply();
-    }
 }

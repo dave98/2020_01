@@ -34,6 +34,7 @@ public class Dashboard extends AppCompatActivity implements NavigationView.OnNav
     private DrawerLayout drawerLayout;
 
     public static ArrayList<Article> enviroments_books = new ArrayList<>();
+    public static ArrayList<Article> last_read_stack = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +125,13 @@ public class Dashboard extends AppCompatActivity implements NavigationView.OnNav
         if(enviroments_books == null){
             Toast.makeText(this, "Error cargando información de entorno", Toast.LENGTH_SHORT).show();
             enviroments_books = new ArrayList<>();
+        }
+        //  Now with last read stack
+
+        String json_last = sharedPreferences.getString("lastread_list", null);
+        last_read_stack = gson.fromJson(json_last, type);
+        if(last_read_stack == null){
+            last_read_stack = new ArrayList<>();
         }
     }
 }
