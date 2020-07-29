@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:outlineAmbientShadowColor="#ffffff"
+    app:cardCornerRadius="3dp"
+    app:cardElevation="3dp"
+    app:cardUseCompatPadding="true">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/loginHintsColor"
+        android:padding="10dp">
+
+        <ImageView
+            android:id="@+id/card_thumbnail"
+            android:layout_width="90dp"
+            android:layout_height="120dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/kitten_cat_avatar_35_512" />
+
+        <TextView
+            android:id="@+id/card_filename"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="15dp"
+            android:layout_marginLeft="15dp"
+            android:layout_toEndOf="@id/card_thumbnail"
+            android:layout_toRightOf="@id/card_thumbnail"
+            android:text="DEFAULT_NAME"
+            android:textSize="15dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/card_desc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/card_filename"
+            android:layout_gravity="center"
+            android:layout_marginStart="15dp"
+            android:layout_marginLeft="15dp"
+            android:layout_toEndOf="@id/card_thumbnail"
+            android:layout_toRightOf="@id/card_thumbnail"
+            android:text="DEFAULT_DESCRIPTION_1"
+            android:textSize="12dp"
+            android:textStyle="normal" />
+
+        <TextView
+            android:id="@+id/card_desc_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/card_desc"
+            android:layout_gravity="center"
+            android:layout_marginStart="15dp"
+            android:layout_marginLeft="15dp"
+            android:layout_toEndOf="@id/card_thumbnail"
+            android:layout_toRightOf="@id/card_thumbnail"
+            android:text="DEFAULT_DESCRIPTION_2"
+            android:textSize="10dp"
+            android:textStyle="normal" />
+
+        <ImageButton
+            android:id="@+id/card_addfavorite"
+            android:layout_width="wrap_content"
+            android:layout_toRightOf="@id/card_thumbnail"
+            android:layout_marginStart="15dp"
+            android:layout_marginLeft="15dp"
+            android:layout_below="@id/card_desc_2"
+            android:layout_marginTop="15dp"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_favorite" />
+
+        <ImageButton
+            android:id="@+id/card_bookcollection"
+            android:layout_width="wrap_content"
+            android:layout_toRightOf="@id/card_addfavorite"
+            android:layout_marginStart="15dp"
+            android:layout_marginLeft="15dp"
+            android:layout_below="@id/card_desc_2"
+            android:layout_marginTop="15dp"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_book_collection" />
+
+        <ImageButton
+            android:id="@+id/card_notifications"
+            android:layout_width="wrap_content"
+            android:layout_toRightOf="@id/card_bookcollection"
+            android:layout_marginStart="15dp"
+            android:layout_marginLeft="15dp"
+            android:layout_below="@id/card_desc_2"
+            android:layout_marginTop="15dp"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_notifications" />
+
+        <ImageButton
+            android:id="@+id/card_garbage"
+            android:layout_width="wrap_content"
+            android:layout_toRightOf="@id/card_notifications"
+            android:layout_marginStart="15dp"
+            android:layout_marginLeft="15dp"
+            android:layout_below="@id/card_desc_2"
+            android:layout_marginTop="15dp"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_garbage" />
+
+
+    </RelativeLayout>
+
+
+</androidx.cardview.widget.CardView>

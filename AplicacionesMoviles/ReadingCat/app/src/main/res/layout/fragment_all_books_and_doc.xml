@@ -2,12 +2,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/backgroundColor2">
+    android:background="@color/backgroundColor">
 
-    <Button
-        android:id="@+id/all_book_buttom"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="Test Toast" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView_AllBooks"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
 </RelativeLayout>

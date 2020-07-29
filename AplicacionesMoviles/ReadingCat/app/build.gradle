@@ -39,4 +39,11 @@ dependencies {
     //glid
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
+
+    //pdf Viewer
+    implementation 'com.github.barteksc:android-pdf-viewer:2.8.2'
+
+    //gson -> Object to SharedPreferences
+    implementation 'com.google.code.gson:gson:2.8.6'
+
 }

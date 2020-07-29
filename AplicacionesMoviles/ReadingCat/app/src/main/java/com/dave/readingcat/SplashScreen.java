@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ActivityOptions;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Pair;
@@ -14,9 +15,15 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.io.File;
+import com.dave.readingcat.entities.Article;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
-public class SplashScreen extends AppCompatActivity {
+import java.io.File;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+
+public class  SplashScreen extends AppCompatActivity {
 
     private static int SPLASH_SCREEN = 5000;
     //Variables
@@ -24,8 +31,10 @@ public class SplashScreen extends AppCompatActivity {
     ImageView image;
     TextView logo, slogan;
 
-    //private File storage;
-    //private String[] allPath;
+    private File storage;
+    private String[] allPath;
+
+    ArrayList<Article> allBookSharedPref = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,12 +56,12 @@ public class SplashScreen extends AppCompatActivity {
         slogan.setAnimation(bottomAnim);
 
         //Loading Data Taken From https://www.youtube.com/watch?v=TQg98mQL2hs
-        //allPath = StorageUtil.getStorageDirectories(this);
-        //for(String path : allPath){
-        //    storage = new File(path);
-        //    Method.load_Directory_Files(storage);
-        //}
-
+        allPath = StorageUtil.getStorageDirectories(this);
+        for(String path : allPath){
+            storage = new File(path);
+            Method.load_Directory_Files(storage);
+        }
+        SaveData();  // HERE: Convert all in "allBookListed" to Articles and save in SharedPrefences
 
         //After SPLASH_SCREEN time, we go to the next activity
         //Transition animation taken from: https://www.youtube.com/watch?v=C_TEugAIMHA
@@ -69,5 +78,32 @@ public class SplashScreen extends AppCompatActivity {
                 //finish();
             }
         }, SPLASH_SCREEN);
+    }
+
+    private void SaveData(){
+        // Create articles from raw examination
+        for(File f : AcceptedExtension.allBookListed){
+            Article article = new Article(f.getName(), f.getPath());
+            allBookSharedPref.add(article);
+        }
+
+        SharedPreferences sharedPreferences = getSharedPreferences("shared_preferences", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(allBookSharedPref);
+        editor.putString("allbooks_list", json);
+        editor.apply();
+    }
+
+    private void LoadData(){
+        SharedPreferences sharedPreferences = getSharedPreferences("shared_preferences", MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString("allbooks_list", null);
+        Type type = new TypeToken<ArrayList<Article>>(){}.getType();
+        allBookSharedPref = gson.fromJson(json, type);
+
+        if(allBookSharedPref == null){
+            allBookSharedPref = new ArrayList<>();
+        }
     }
 }
