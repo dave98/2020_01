@@ -1,4 +1,4 @@
-package com.dave.readingcat;
+package com.dave.readingcat.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.dave.readingcat.R;
 import com.dave.readingcat.entities.Book;
 import com.dave.readingcat.fragment_adapters.AdapterToRead;
 

@@ -1,77 +1,61 @@
 package com.dave.readingcat.fragment_adapters;
 
 import android.content.Context;
-import android.media.Image;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.dave.readingcat.AcceptedExtension;
-import com.dave.readingcat.PdfRequestHandler;
 import com.dave.readingcat.R;
 import com.dave.readingcat.entities.Article;
-import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.RandomAccessFile;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class AdapterAllBooks extends RecyclerView.Adapter<AdapterAllBooks.ViewHolder> implements View.OnClickListener {
+public class AdapterNotification extends RecyclerView.Adapter<AdapterNotification.ViewHolder> implements View.OnClickListener {
     LayoutInflater inflater;
     ArrayList<Article> articles_in;
     private Context mContext;
     private View.OnClickListener listener;
 
-    Picasso picassoInstance;
-
-    public AdapterAllBooks(Context _context, ArrayList<Article> _articles_in) {
+    public AdapterNotification(Context _context, ArrayList<Article> _articles_in){
         this.inflater = LayoutInflater.from(_context);
         this.articles_in = _articles_in;
         this.mContext = _context;
-
-        picassoInstance = new Picasso.Builder(mContext.getApplicationContext()).addRequestHandler(new PdfRequestHandler()).build();
     }
 
     @NonNull
     @Override
-    public AdapterAllBooks.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public AdapterNotification.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = inflater.inflate(R.layout.card_to_list, parent, false);
         view.setOnClickListener(this);
         return new ViewHolder(view);
     }
 
-    public void setOnClickListener(View.OnClickListener _listener) {
+    public void setOnClickListener(View.OnClickListener _listener){
         this.listener = _listener;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull AdapterAllBooks.ViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull AdapterNotification.ViewHolder holder, int position) {
         File data_dir = new File(articles_in.get(position).getArticle_path());
-        Date file_date = new Date(data_dir.lastModified());
+        Date file_date =  new Date(data_dir.lastModified());
 
         holder.book_name.setText(data_dir.getName());
-        holder.book_date.setText(file_date.toString());                               // Fecha de ultima modificación
-        holder.book_size.setText(String.valueOf(data_dir.length() / 1024) + " Kb");   // Tamaño del Archivo
+        holder.book_date.setText(file_date.toString());
+        holder.book_size.setText(String.valueOf(data_dir.length()/1024) + " Kb");
 
         /*
         Uri uri = Uri.fromFile(data_dir); // Getting thumbnail
         Glide.with(this.mContext)
                 .load(uri).thumbnail(0.1f).into(holder.book_image);
-        */
-        /*
-        picassoInstance.load(PdfRequestHandler.SCHEME_PDF+":"+data_dir.getPath()).fit().into(holder.book_image);
         */
 
         holder.book_favorite.setOnClickListener(this);
@@ -81,13 +65,11 @@ public class AdapterAllBooks extends RecyclerView.Adapter<AdapterAllBooks.ViewHo
     }
 
     @Override
-    public int getItemCount() {
-        return articles_in.size();
-    }
+    public int getItemCount() { return articles_in.size(); }
 
     @Override
     public void onClick(View v) {
-        if (listener != null) {
+        if(listener != null){
             listener.onClick(v);
         }
     }
@@ -116,5 +98,4 @@ public class AdapterAllBooks extends RecyclerView.Adapter<AdapterAllBooks.ViewHo
             book_garbage = (ImageButton) itemView.findViewById(R.id.card_garbage);
         }
     }
-
 }

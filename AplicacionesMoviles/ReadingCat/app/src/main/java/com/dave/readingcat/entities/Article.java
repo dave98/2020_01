@@ -3,21 +3,17 @@ package com.dave.readingcat.entities;
 import java.util.Objects;
 
 public class Article {
-    private String article_name;
     private String article_path;
+    private Boolean is_favorite;
+    private Boolean is_deleted;
+    private Boolean is_synch;
 
     public Article() {}
-    public Article(String article_name, String article_path) {
-        this.article_name = article_name;
+    public Article(String article_path) {
         this.article_path = article_path;
-    }
-
-    public String getArticle_name() {
-        return article_name;
-    }
-
-    public void setArticle_name(String article_name) {
-        this.article_name = article_name;
+        this.is_favorite = false;
+        this.is_deleted = false;
+        this.is_synch = false;
     }
 
     public String getArticle_path() {
@@ -28,6 +24,30 @@ public class Article {
         this.article_path = article_path;
     }
 
+    public Boolean getIs_favorite() {
+        return is_favorite;
+    }
+
+    public void setIs_favorite(Boolean is_favorite) {
+        this.is_favorite = is_favorite;
+    }
+
+    public Boolean getIs_deleted() {
+        return is_deleted;
+    }
+
+    public void setIs_deleted(Boolean is_deleted) {
+        this.is_deleted = is_deleted;
+    }
+
+    public Boolean getIs_synch() {
+        return is_synch;
+    }
+
+    public void setIs_synch(Boolean is_synch) {
+        this.is_synch = is_synch;
+    }
+
     @Override
     public boolean equals(Object o){
         if(o == this) return true;
@@ -35,12 +55,11 @@ public class Article {
             return false;
         }
         Article article = (Article)o;
-        return Objects.equals(this.getArticle_name(), article.getArticle_name()) &&
-                Objects.equals(this.getArticle_path(), article.getArticle_path());
+        return Objects.equals(this.getArticle_path(), article.getArticle_path());
     }
 
     @Override
     public int hashCode(){
-        return Objects.hash(article_name, article_path);
+        return Objects.hash(article_path);
     }
 }

@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -49,13 +50,19 @@ public class AdapterLastRead extends RecyclerView.Adapter<AdapterLastRead.ViewHo
         File data_dir = new File(arcticles_lastread.get(position).getArticle_path());
         Date file_date = new Date((data_dir.lastModified()));
 
-        holder.book_name.setText(arcticles_lastread.get(position).getArticle_name());
+        holder.book_name.setText(data_dir.getName());
         holder.book_date.setText(file_date.toString());
         holder.book_size.setText(String.valueOf(data_dir.length()/1024) + " Kb"); // Tamaño del Archivo
 
+        /*
         Uri uri = Uri.fromFile(data_dir);
         Glide.with(this.mcontext)
                 .load(uri).thumbnail(0.1f).into(holder.book_image);
+        */
+        holder.book_favorite.setOnClickListener(this);
+        holder.book_collection.setOnClickListener(this);
+        holder.book_notification.setOnClickListener(this);
+        holder.book_garbage.setOnClickListener(this);
     }
 
     @Override
@@ -76,6 +83,10 @@ public class AdapterLastRead extends RecyclerView.Adapter<AdapterLastRead.ViewHo
         TextView book_date;
         TextView book_size;
 
+        ImageButton book_favorite;
+        ImageButton book_collection;
+        ImageButton book_notification;
+        ImageButton book_garbage;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -83,6 +94,11 @@ public class AdapterLastRead extends RecyclerView.Adapter<AdapterLastRead.ViewHo
             book_name = (TextView) itemView.findViewById(R.id.card_filename);
             book_date = (TextView) itemView.findViewById(R.id.card_desc);
             book_size = (TextView) itemView.findViewById(R.id.card_desc_2);
+
+            book_favorite = (ImageButton) itemView.findViewById(R.id.card_addfavorite);
+            book_collection = (ImageButton) itemView.findViewById(R.id.card_bookcollection);
+            book_notification = (ImageButton) itemView.findViewById(R.id.card_notifications);
+            book_garbage = (ImageButton) itemView.findViewById(R.id.card_garbage);
         }
     }
 

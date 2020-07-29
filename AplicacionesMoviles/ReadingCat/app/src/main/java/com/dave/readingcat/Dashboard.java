@@ -7,19 +7,39 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.view.WindowManager;
+import android.widget.Toast;
 
+import com.dave.readingcat.entities.Article;
+import com.dave.readingcat.fragments.FragmentAllBooks;
+import com.dave.readingcat.fragments.FragmentBookCollections;
+import com.dave.readingcat.fragments.FragmentConfiguration;
+import com.dave.readingcat.fragments.FragmentFavorite;
+import com.dave.readingcat.fragments.FragmentGarbage;
+import com.dave.readingcat.fragments.FragmentLastRead;
+import com.dave.readingcat.fragments.FragmentNotifications;
+import com.dave.readingcat.fragments.FragmentProgrammer;
+import com.dave.readingcat.fragments.FragmentToRead;
+import com.dave.readingcat.fragments.FragmentUpdate;
 import com.google.android.material.navigation.NavigationView;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 
 public class Dashboard extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private DrawerLayout drawerLayout;
+
+    public static ArrayList<Article> enviroments_books = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        LoadEnviromentData(); // Cargando todos los libros de entorno
         setContentView(R.layout.activity_dashboard);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -94,5 +114,16 @@ public class Dashboard extends AppCompatActivity implements NavigationView.OnNav
 
     }
 
+    private void LoadEnviromentData(){
+        SharedPreferences sharedPreferences = getSharedPreferences("shared_preferences", MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString("allbooks_list", null);
+        Type type = new TypeToken<ArrayList<Article>>(){}.getType();
+        enviroments_books = gson.fromJson(json, type);
 
+        if(enviroments_books == null){
+            Toast.makeText(this, "Error cargando información de entorno", Toast.LENGTH_SHORT).show();
+            enviroments_books = new ArrayList<>();
+        }
+    }
 }

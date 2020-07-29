@@ -55,8 +55,8 @@ public class  SplashScreen extends AppCompatActivity {
         logo.setAnimation(bottomAnim);
         slogan.setAnimation(bottomAnim);
 
-        //Loading Data Taken From https://www.youtube.com/watch?v=TQg98mQL2hs
-        allPath = StorageUtil.getStorageDirectories(this);
+        LoadData();
+        allPath = StorageUtil.getStorageDirectories(this); //Loading Data Taken From https://www.youtube.com/watch?v=TQg98mQL2hs
         for(String path : allPath){
             storage = new File(path);
             Method.load_Directory_Files(storage);
@@ -83,8 +83,12 @@ public class  SplashScreen extends AppCompatActivity {
     private void SaveData(){
         // Create articles from raw examination
         for(File f : AcceptedExtension.allBookListed){
-            Article article = new Article(f.getName(), f.getPath());
-            allBookSharedPref.add(article);
+            Article article = new Article(f.getPath());
+
+            int is_indexed = allBookSharedPref.indexOf(article);
+            if(is_indexed == -1){ // Si el libro no esta indexado, lo guardamos.
+                allBookSharedPref.add(article);
+            }
         }
 
         SharedPreferences sharedPreferences = getSharedPreferences("shared_preferences", MODE_PRIVATE);

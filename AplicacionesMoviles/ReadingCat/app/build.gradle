@@ -46,4 +46,7 @@ dependencies {
     //gson -> Object to SharedPreferences
     implementation 'com.google.code.gson:gson:2.8.6'
 
+    //picasso
+    implementation 'com.squareup.picasso:picasso:2.71828'
+
 }

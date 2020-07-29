@@ -1,7 +1,6 @@
 package com.dave.readingcat.fragment_adapters;
 
 import android.content.Context;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +11,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.dave.readingcat.R;
 import com.dave.readingcat.entities.Article;
 
@@ -20,42 +18,32 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class AdapterFavorite extends RecyclerView.Adapter<AdapterFavorite.ViewHolder> implements View.OnClickListener {
+public class AdapterGarbage extends RecyclerView.Adapter<AdapterGarbage.ViewHolder> implements View.OnClickListener {
     LayoutInflater inflater;
     ArrayList<Article> articles_in;
-    private Context mContext;
+    private Context mcontext;
     private View.OnClickListener listener;
 
-    public AdapterFavorite(Context _context, ArrayList<Article> _articles_in){
-        this.inflater = LayoutInflater.from(_context);
-        this.articles_in = _articles_in;
-        this.mContext = _context;
+    public AdapterGarbage(Context _context, ArrayList<Article> _articles_in){
+       this.inflater = LayoutInflater.from(_context);
+       this.articles_in = _articles_in;
+       this.mcontext = _context;
     }
-
-    @Override
-    public void onClick(View v) {
-        if (listener != null) {
-            listener.onClick(v);
-        }
-    }
-
-    public void setOnClickListener(View.OnClickListener _listener) {
-        this.listener = _listener;
-    }
-
 
     @NonNull
     @Override
-    public AdapterFavorite.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = inflater.inflate(R.layout.card_to_list, parent, false);
+    public AdapterGarbage.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = inflater.inflate(R.layout.card_to_recover, parent, false);
         view.setOnClickListener(this);
         return new ViewHolder(view);
     }
 
+    public void setOnClickListener(View.OnClickListener _listener){this.listener = _listener;}
+
     @Override
-    public void onBindViewHolder(@NonNull AdapterFavorite.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull AdapterGarbage.ViewHolder holder, int position) {
         File data_dir = new File(articles_in.get(position).getArticle_path());
-        Date file_date = new Date((data_dir.lastModified()));
+        Date file_date = new Date(data_dir.lastModified());
 
         holder.book_name.setText(data_dir.getName());
         holder.book_date.setText(file_date.toString());                               // Fecha de ultima modificación
@@ -67,24 +55,25 @@ public class AdapterFavorite extends RecyclerView.Adapter<AdapterFavorite.ViewHo
                 .load(uri).thumbnail(0.1f).into(holder.book_image);
         */
 
-        holder.book_favorite.setOnClickListener(this);
-        holder.book_collection.setOnClickListener(this);
-        holder.book_notification.setOnClickListener(this);
         holder.book_garbage.setOnClickListener(this);
     }
 
     @Override
-    public int getItemCount() { return articles_in.size(); }
+    public int getItemCount() { return  articles_in.size(); }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    @Override
+    public void onClick(View v) {
+        if(listener != null){
+            listener.onClick(v);
+        }
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder {
         ImageView book_image;
         TextView book_name;
         TextView book_date;
         TextView book_size;
 
-        ImageButton book_favorite;
-        ImageButton book_collection;
-        ImageButton book_notification;
         ImageButton book_garbage;
 
         public ViewHolder(@NonNull View itemView) {
@@ -94,9 +83,6 @@ public class AdapterFavorite extends RecyclerView.Adapter<AdapterFavorite.ViewHo
             book_date = (TextView) itemView.findViewById(R.id.card_desc);
             book_size = (TextView) itemView.findViewById(R.id.card_desc_2);
 
-            book_favorite = (ImageButton) itemView.findViewById(R.id.card_addfavorite);
-            book_collection = (ImageButton) itemView.findViewById(R.id.card_bookcollection);
-            book_notification = (ImageButton) itemView.findViewById(R.id.card_notifications);
             book_garbage = (ImageButton) itemView.findViewById(R.id.card_garbage);
         }
     }
