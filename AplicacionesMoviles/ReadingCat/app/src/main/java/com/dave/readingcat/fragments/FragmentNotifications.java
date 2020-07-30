@@ -137,6 +137,8 @@ public class FragmentNotifications extends Fragment {
             }
             else{ Toast.makeText(v.getContext(), "Error de sincronización en capa bilineal", Toast.LENGTH_SHORT).show(); }
         }
+        adapterNotification.notifyItemChanged(recyclerViewNotifications.getChildAdapterPosition(v));
+
     }
 
     private void DeleteFromNotification(View v){

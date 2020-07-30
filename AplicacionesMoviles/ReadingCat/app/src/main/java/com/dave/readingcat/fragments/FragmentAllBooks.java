@@ -60,7 +60,7 @@ public class FragmentAllBooks extends Fragment{
             public void onClick(View v) {
                 int id = v.getId();
                 switch (id){
-                    case R.id.card_addfavorite:;
+                    case R.id.card_addfavorite:
                         AddToFavoriteBook((View) v.getParent().getParent()); // RelativeLayout|LinearLayout|RecyclerView
                         break;
                     case R.id.card_bookcollection:
@@ -146,6 +146,7 @@ public class FragmentAllBooks extends Fragment{
             }
             else{ Toast.makeText(v.getContext(), "Error de sincronización en capa bilineal", Toast.LENGTH_SHORT).show(); }
         }
+        adapterAllBooks.notifyItemChanged(recyclerViewAllBook.getChildAdapterPosition(v));
     }
 
     private void AddToNotification(View v){
@@ -173,6 +174,7 @@ public class FragmentAllBooks extends Fragment{
             }
             else{ Toast.makeText(v.getContext(), "Error de sincronización en capa bilineal", Toast.LENGTH_SHORT).show(); }
         }
+        adapterAllBooks.notifyItemChanged(recyclerViewAllBook.getChildAdapterPosition(v));
     }
 
     // Todos los libros que se puedan ver en esta pantalla estan fuera de la papelera
@@ -207,6 +209,7 @@ public class FragmentAllBooks extends Fragment{
             adapterAllBooks.notifyItemRemoved(pos);
             Toast.makeText(v.getContext(), "Se ha movido a la papelera", Toast.LENGTH_SHORT).show();
         }
+        adapterAllBooks.notifyItemChanged(recyclerViewAllBook.getChildAdapterPosition(v));
     }
 
     private void OpenBook(View v){

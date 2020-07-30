@@ -105,7 +105,6 @@ public class FragmentLastRead extends Fragment {
         editor.apply();
     }
 
-
     private void AddToFavorite(View v){
         int index = enviroments_books.indexOf(lastBookSharedPref.get(recyclerViewLastRead.getChildAdapterPosition(v)));
         if(index == -1){ // Todos los libros en lastread deben estar en los libros de ambiente.
@@ -129,6 +128,7 @@ public class FragmentLastRead extends Fragment {
                 SaveLastReadData();
             }
         }
+        adapterLastRead.notifyItemChanged(recyclerViewLastRead.getChildAdapterPosition(v));
     }
 
     private void AddToNotification(View v){
@@ -137,7 +137,7 @@ public class FragmentLastRead extends Fragment {
             Toast.makeText(v.getContext(), "Error de sincronización bilineal", Toast.LENGTH_SHORT).show();
         }
         else{
-            if( !enviroments_books.get(index).getIs_favorite()){
+            if( !enviroments_books.get(index).getIs_synch()){
                 lastBookSharedPref.get(recyclerViewLastRead.getChildAdapterPosition(v)).setIs_synch(true); // LocalUpdate
                 enviroments_books.get(index).setIs_synch(true); // GlobalUpdate
 
@@ -154,6 +154,7 @@ public class FragmentLastRead extends Fragment {
                 SaveLastReadData();
             }
         }
+        adapterLastRead.notifyItemChanged(recyclerViewLastRead.getChildAdapterPosition(v));
     }
 
     private void DeleteBook(View v){

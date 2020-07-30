@@ -161,6 +161,7 @@ public class FragmentFavorite extends Fragment {
             }
             else{ Toast.makeText(v.getContext(), "Error de sincronización en capa bilineal", Toast.LENGTH_SHORT).show(); }
         }
+        adapterFavorite.notifyItemChanged(recyclerViewFavorite.getChildAdapterPosition(v));
     }
 
     // Todos los libros que se puedan ver en esta pantalla estan fuera de la papelera

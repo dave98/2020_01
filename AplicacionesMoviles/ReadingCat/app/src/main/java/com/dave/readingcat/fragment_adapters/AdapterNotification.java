@@ -1,6 +1,7 @@
 package com.dave.readingcat.fragment_adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,6 +58,16 @@ public class AdapterNotification extends RecyclerView.Adapter<AdapterNotificatio
         Glide.with(this.mContext)
                 .load(uri).thumbnail(0.1f).into(holder.book_image);
         */
+
+        if(articles_in.get(position).getIs_favorite()){ holder.book_favorite.setColorFilter(Color.BLACK); }
+        else{ holder.book_favorite.setColorFilter(Color.GRAY); }
+
+        if(articles_in.get(position).getIs_synch()){ holder.book_notification.setColorFilter(Color.BLACK); }
+        else{ holder.book_notification.setColorFilter(Color.GRAY); }
+
+        if(articles_in.get(position).getIs_deleted()){ holder.book_garbage.setColorFilter(Color.BLACK); }
+        else{ holder.book_garbage.setColorFilter(Color.GRAY); }
+
 
         holder.book_favorite.setOnClickListener(this);
         holder.book_collection.setOnClickListener(this);

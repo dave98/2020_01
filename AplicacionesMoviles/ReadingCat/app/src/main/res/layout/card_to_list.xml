@@ -7,8 +7,7 @@
     android:outlineAmbientShadowColor="#ffffff"
     app:cardCornerRadius="3dp"
     app:cardElevation="3dp"
-    app:cardUseCompatPadding="true"
-    >
+    app:cardUseCompatPadding="true">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -34,7 +33,8 @@
             android:layout_toRightOf="@id/card_thumbnail"
             android:text="DEFAULT_NAME"
             android:textSize="15dp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:fontFamily="@font/anonymous_pro"/>
 
         <TextView
             android:id="@+id/card_desc"
@@ -67,45 +67,49 @@
         <ImageButton
             android:id="@+id/card_addfavorite"
             android:layout_width="wrap_content"
-            android:layout_toRightOf="@id/card_thumbnail"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/card_desc_2"
             android:layout_marginStart="15dp"
             android:layout_marginLeft="15dp"
-            android:layout_below="@id/card_desc_2"
             android:layout_marginTop="15dp"
-            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/card_thumbnail"
+            android:backgroundTint="@color/backgroundColor3"
             android:src="@drawable/ic_favorite" />
 
         <ImageButton
             android:id="@+id/card_bookcollection"
             android:layout_width="wrap_content"
-            android:layout_toRightOf="@id/card_addfavorite"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/card_desc_2"
             android:layout_marginStart="15dp"
             android:layout_marginLeft="15dp"
-            android:layout_below="@id/card_desc_2"
             android:layout_marginTop="15dp"
-            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/card_addfavorite"
+            android:backgroundTint="@color/backgroundColor3"
             android:src="@drawable/ic_book_collection" />
 
         <ImageButton
             android:id="@+id/card_notifications"
             android:layout_width="wrap_content"
-            android:layout_toRightOf="@id/card_bookcollection"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/card_desc_2"
             android:layout_marginStart="15dp"
             android:layout_marginLeft="15dp"
-            android:layout_below="@id/card_desc_2"
             android:layout_marginTop="15dp"
-            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/card_bookcollection"
+            android:backgroundTint="@color/backgroundColor3"
             android:src="@drawable/ic_notifications" />
 
         <ImageButton
             android:id="@+id/card_garbage"
             android:layout_width="wrap_content"
-            android:layout_toRightOf="@id/card_notifications"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/card_desc_2"
             android:layout_marginStart="15dp"
             android:layout_marginLeft="15dp"
-            android:layout_below="@id/card_desc_2"
             android:layout_marginTop="15dp"
-            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/card_notifications"
+            android:backgroundTint="@color/backgroundColor3"
             android:src="@drawable/ic_garbage" />
 
     </RelativeLayout>

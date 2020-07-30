@@ -77,7 +77,8 @@ public class FragmentToRead extends Fragment {
                 toReadSharedPref.add(book);
             }
         }
-
+        Collections.sort(toReadSharedPref);
+        Collections.reverse(toReadSharedPref);
     }
 
     // (Actualiza) Guarda todos los datos de enviroments_books en shared_preferences:allbook_list
@@ -136,7 +137,7 @@ public class FragmentToRead extends Fragment {
             }
             else{ Toast.makeText(v.getContext(), "Error de sincronización en capa bilineal", Toast.LENGTH_SHORT).show(); }
         }
-
+        adapterToRead.notifyItemChanged(recyclerViewToRead.getChildAdapterPosition(v));
     }
 
     private void AddToNotification(View v){
@@ -164,7 +165,7 @@ public class FragmentToRead extends Fragment {
             }
             else{ Toast.makeText(v.getContext(), "Error de sincronización en capa bilineal", Toast.LENGTH_SHORT).show(); }
         }
-
+        adapterToRead.notifyItemChanged(recyclerViewToRead.getChildAdapterPosition(v));
     }
 
     private void DeleteBook(View v){

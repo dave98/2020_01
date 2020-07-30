@@ -1,8 +1,10 @@
 package com.dave.readingcat.entities;
 
+import java.io.File;
+import java.util.Date;
 import java.util.Objects;
 
-public class Article {
+public class Article implements Comparable<Article> {
     private String article_path;
     private Boolean is_favorite;
     private Boolean is_deleted;
@@ -61,5 +63,12 @@ public class Article {
     @Override
     public int hashCode(){
         return Objects.hash(article_path);
+    }
+
+    @Override
+    public int compareTo(Article o) {
+        Date temp_here = new Date( new File(this.getArticle_path()).lastModified() );
+        Date temp_there = new Date( new File(o.getArticle_path()).lastModified() );
+        return temp_here.compareTo(temp_there);
     }
 }

@@ -1,6 +1,7 @@
 package com.dave.readingcat.fragment_adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.media.Image;
 import android.net.Uri;
 import android.view.LayoutInflater;
@@ -74,10 +75,22 @@ public class AdapterAllBooks extends RecyclerView.Adapter<AdapterAllBooks.ViewHo
         picassoInstance.load(PdfRequestHandler.SCHEME_PDF+":"+data_dir.getPath()).fit().into(holder.book_image);
         */
 
+        if(articles_in.get(position).getIs_favorite()){ holder.book_favorite.setColorFilter(Color.BLACK); }
+        else{ holder.book_favorite.setColorFilter(Color.GRAY); }
+
+        if(articles_in.get(position).getIs_synch()){ holder.book_notification.setColorFilter(Color.BLACK); }
+        else{ holder.book_notification.setColorFilter(Color.GRAY); }
+
+        if(articles_in.get(position).getIs_deleted()){ holder.book_garbage.setColorFilter(Color.BLACK); }
+        else{ holder.book_garbage.setColorFilter(Color.GRAY); }
+
+
         holder.book_favorite.setOnClickListener(this);
         holder.book_collection.setOnClickListener(this);
         holder.book_notification.setOnClickListener(this);
         holder.book_garbage.setOnClickListener(this);
+
+
     }
 
     @Override
@@ -114,6 +127,7 @@ public class AdapterAllBooks extends RecyclerView.Adapter<AdapterAllBooks.ViewHo
             book_collection = (ImageButton) itemView.findViewById(R.id.card_bookcollection);
             book_notification = (ImageButton) itemView.findViewById(R.id.card_notifications);
             book_garbage = (ImageButton) itemView.findViewById(R.id.card_garbage);
+
         }
     }
 
