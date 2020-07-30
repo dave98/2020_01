@@ -7,8 +7,14 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import android.content.ContentResolver;
 import android.content.SharedPreferences;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -30,15 +36,18 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
-public class Dashboard extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class Dashboard extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SensorEventListener {
     private DrawerLayout drawerLayout;
 
     public static ArrayList<Article> enviroments_books = new ArrayList<>();
     public static ArrayList<Article> last_read_stack = new ArrayList<>();
 
+    SensorManager sm;
+    Sensor sensor;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         LoadEnviromentData(); // Cargando todos los libros de entorno
         setContentView(R.layout.activity_dashboard);
@@ -63,6 +72,12 @@ public class Dashboard extends AppCompatActivity implements NavigationView.OnNav
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new FragmentAllBooks()).commit();
             navigationView.setCheckedItem(R.id.nav_all_books_and_docs);
         }
+
+        /*Sensor section*/
+        sm = (SensorManager)getSystemService(SENSOR_SERVICE);
+        sensor = sm.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        sm.registerListener(this, sensor, SensorManager.SENSOR_DELAY_FASTEST);
+
     }
 
     @Override
@@ -110,7 +125,7 @@ public class Dashboard extends AppCompatActivity implements NavigationView.OnNav
         if(drawerLayout.isDrawerOpen(GravityCompat.START)){
             drawerLayout.closeDrawer(GravityCompat.START);
         }else{
-            super.onBackPressed();
+            //super.onBackPressed();
         }
 
     }
@@ -133,5 +148,26 @@ public class Dashboard extends AppCompatActivity implements NavigationView.OnNav
         if(last_read_stack == null){
             last_read_stack = new ArrayList<>();
         }
+    }
+
+
+    /*SENSOR VARIABLES*/
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        float current_val = event.values[0];
+
+        if( current_val > sensor.getMaximumRange()){
+            current_val = sensor.getMaximumRange();
+        }
+        current_val = current_val / sensor.getMaximumRange(); /* Between 0 - 1, for percent */
+        int brightness = (int)(current_val * 255);
+
+        ContentResolver contentResolver = getApplicationContext().getContentResolver();
+        Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS, brightness);
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
     }
 }

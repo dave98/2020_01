@@ -76,5 +76,19 @@
             android:layout_toRightOf="@id/card_thumbnail"
             android:backgroundTint="@color/backgroundColor3"
             android:src="@drawable/ic_garbage" />
+
+        <ImageButton
+            android:id="@+id/card_garbage_forever"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/card_desc_2"
+            android:layout_marginStart="15dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="15dp"
+            android:layout_toRightOf="@id/card_garbage"
+            android:layout_toEndOf="@id/card_garbage"
+            android:backgroundTint="@color/backgroundColor3"
+            android:src="@drawable/ic_delete_forever" />
+
     </RelativeLayout>
 </androidx.cardview.widget.CardView>

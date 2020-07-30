@@ -6,7 +6,7 @@
     <color name="colorAccent">#D1D1D1</color>
     <color name="colorTitle">#ffffff</color>
     <color name="backgroundColor">#1C1C1C</color>
-    <color name="backgroundColor2">#EAEAEA</color>
+    <color name="backgroundColor2">#B2BCBCBC</color>
     <color name="backgroundColor3">#ffffff</color>
     <color name="loginHintsColor">#B3B3B3</color>
 </resources>

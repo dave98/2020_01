@@ -31,10 +31,10 @@
             android:layout_marginLeft="15dp"
             android:layout_toEndOf="@id/card_thumbnail"
             android:layout_toRightOf="@id/card_thumbnail"
+            android:fontFamily="@font/anonymous_pro"
             android:text="DEFAULT_NAME"
             android:textSize="15dp"
-            android:textStyle="bold"
-            android:fontFamily="@font/anonymous_pro"/>
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/card_desc"
@@ -64,14 +64,40 @@
             android:textSize="10dp"
             android:textStyle="normal" />
 
+        <TextView
+            android:id="@+id/card_desc_3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/card_desc_2"
+            android:layout_gravity="center"
+            android:layout_marginStart="15dp"
+            android:layout_marginLeft="15dp"
+            android:layout_toEndOf="@id/card_thumbnail"
+            android:layout_toRightOf="@id/card_thumbnail"
+            android:text="DEFAULT_DESCRIPTION_3"
+            android:textSize="10dp"
+            android:textStyle="normal" />
+
+        <ProgressBar
+            android:id="@+id/card_progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="12dp"
+            android:layout_below="@id/card_desc_3"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_toEndOf="@id/card_thumbnail"
+            android:layout_toRightOf="@+id/card_thumbnail" />
+
+
         <ImageButton
             android:id="@+id/card_addfavorite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/card_desc_2"
+            android:layout_below="@id/card_progress_bar"
             android:layout_marginStart="15dp"
             android:layout_marginLeft="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:layout_toRightOf="@id/card_thumbnail"
             android:backgroundTint="@color/backgroundColor3"
             android:src="@drawable/ic_favorite" />
@@ -80,10 +106,10 @@
             android:id="@+id/card_bookcollection"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/card_desc_2"
+            android:layout_below="@id/card_progress_bar"
             android:layout_marginStart="15dp"
             android:layout_marginLeft="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:layout_toRightOf="@id/card_addfavorite"
             android:backgroundTint="@color/backgroundColor3"
             android:src="@drawable/ic_book_collection" />
@@ -92,10 +118,10 @@
             android:id="@+id/card_notifications"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/card_desc_2"
+            android:layout_below="@id/card_progress_bar"
             android:layout_marginStart="15dp"
             android:layout_marginLeft="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:layout_toRightOf="@id/card_bookcollection"
             android:backgroundTint="@color/backgroundColor3"
             android:src="@drawable/ic_notifications" />
@@ -104,13 +130,19 @@
             android:id="@+id/card_garbage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/card_desc_2"
+            android:layout_below="@id/card_progress_bar"
             android:layout_marginStart="15dp"
             android:layout_marginLeft="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:layout_toRightOf="@id/card_notifications"
             android:backgroundTint="@color/backgroundColor3"
             android:src="@drawable/ic_garbage" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
     </RelativeLayout>
 </androidx.cardview.widget.CardView>

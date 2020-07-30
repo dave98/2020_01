@@ -9,6 +9,8 @@ public class Article implements Comparable<Article> {
     private Boolean is_favorite;
     private Boolean is_deleted;
     private Boolean is_synch;
+    int current_page;
+    int total_pages;
 
     public Article() {}
     public Article(String article_path) {
@@ -16,6 +18,8 @@ public class Article implements Comparable<Article> {
         this.is_favorite = false;
         this.is_deleted = false;
         this.is_synch = false;
+        this.current_page = 0;
+        this.total_pages = 0;
     }
 
     public String getArticle_path() {
@@ -49,6 +53,16 @@ public class Article implements Comparable<Article> {
     public void setIs_synch(Boolean is_synch) {
         this.is_synch = is_synch;
     }
+
+    public int getCurrent_page() { return current_page; }
+
+    public void setCurrent_page(int current_page) {
+        this.current_page = current_page;
+    }
+
+    public int getTotal_pages() { return total_pages; }
+
+    public void setTotal_pages(int total_pages) { this.total_pages = total_pages; }
 
     @Override
     public boolean equals(Object o){

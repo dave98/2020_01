@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -56,6 +57,18 @@ public class AdapterToRead extends RecyclerView.Adapter<AdapterToRead.ViewHolder
         holder.book_date.setText(file_date.toString());
         holder.book_size.setText(String.valueOf(data_dir.length()/1024) + " Kb");
 
+        if(articles_in.get(position).getTotal_pages() == 0){
+            holder.book_progress.setText("Aún no se ha leído");
+            holder.book_progress_bar.setProgress(0);
+        }
+        else{
+            int total = articles_in.get(position).getTotal_pages();
+            int read_at = articles_in.get(position).getCurrent_page();
+            holder.book_progress.setText("En progreso: " + (read_at+1) + " de " + total);
+            holder.book_progress_bar.setMax(total);
+            holder.book_progress_bar.setProgress(read_at+1);
+        }
+
         /*
         Uri uri = Uri.fromFile(data_dir); // Getting thumbnail
         Glide.with(this.mContext)
@@ -94,6 +107,8 @@ public class AdapterToRead extends RecyclerView.Adapter<AdapterToRead.ViewHolder
         TextView book_name;
         TextView book_date;
         TextView book_size;
+        TextView book_progress;
+        ProgressBar book_progress_bar;
 
         ImageButton book_favorite;
         ImageButton book_collection;
@@ -106,6 +121,8 @@ public class AdapterToRead extends RecyclerView.Adapter<AdapterToRead.ViewHolder
             book_name = (TextView) itemView.findViewById(R.id.card_filename);
             book_date = (TextView) itemView.findViewById(R.id.card_desc);
             book_size = (TextView) itemView.findViewById(R.id.card_desc_2);
+            book_progress = (TextView) itemView.findViewById(R.id.card_desc_3);
+            book_progress_bar = (ProgressBar) itemView.findViewById(R.id.card_progress_bar);
 
             book_favorite = (ImageButton) itemView.findViewById(R.id.card_addfavorite);
             book_collection = (ImageButton) itemView.findViewById(R.id.card_bookcollection);
@@ -114,4 +131,8 @@ public class AdapterToRead extends RecyclerView.Adapter<AdapterToRead.ViewHolder
         }
     }
 
+    public void filterList(ArrayList<Article> filteredList){
+        articles_in = filteredList;
+        notifyDataSetChanged();
+    }
 }

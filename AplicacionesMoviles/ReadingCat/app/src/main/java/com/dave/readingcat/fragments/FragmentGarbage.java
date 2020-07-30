@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -35,7 +36,7 @@ public class FragmentGarbage extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_garbage, container, false);
+        final View view = inflater.inflate(R.layout.fragment_garbage, container, false);
         LoadData();
 
         recyclerViewGarbage = view.findViewById(R.id.recyclerView_Garbage);
@@ -50,6 +51,9 @@ public class FragmentGarbage extends Fragment {
                 switch (id){
                     case R.id.card_garbage:
                         DeleteFromDeleted((View) v.getParent().getParent());
+                        break;
+                    case R.id.card_garbage_forever:
+                        DeleteForever((View) v.getParent().getParent());
                         break;
                     default:
                         OpenBook(v);
@@ -98,6 +102,33 @@ public class FragmentGarbage extends Fragment {
             adapterGarbage.notifyItemRemoved(pos);
             Toast.makeText(v.getContext(), "Se quitó de la papelera", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void DeleteForever(View v){
+        int pos = recyclerViewGarbage.getChildAdapterPosition(v);
+        int index = enviroments_books.indexOf(garbageBookSharedPref.get(recyclerViewGarbage.getChildAdapterPosition(v)));
+        if(index != -1){
+            File temp_file = new File(enviroments_books.get(index).getArticle_path());
+            if(temp_file.exists()){
+                if(temp_file.delete()){
+                    enviroments_books.remove(index);
+                    SaveData();
+
+                    /*LocalChanges*/
+                    garbageBookSharedPref.remove(pos);
+                    adapterGarbage.notifyItemRemoved(pos);
+                    Toast.makeText(v.getContext(), "Se borró definitivamente", Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    Toast.makeText(v.getContext(), "No se pudo borrar el archivo", Toast.LENGTH_SHORT).show();
+                }
+            }
+            else{
+                Toast.makeText(v.getContext(), "No se pudo localizar el archivo", Toast.LENGTH_SHORT).show();
+            }
+        }
+        else{ Toast.makeText(v.getContext(), "Error de sincronización en capa bilineal", Toast.LENGTH_SHORT).show(); }
+
     }
 
     private void OpenBook(View v){

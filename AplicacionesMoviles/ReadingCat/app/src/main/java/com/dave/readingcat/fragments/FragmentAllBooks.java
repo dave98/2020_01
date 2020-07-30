@@ -1,13 +1,20 @@
 package com.dave.readingcat.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.TokenWatcher;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -29,6 +36,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import static android.app.Activity.RESULT_OK;
 import static com.dave.readingcat.Dashboard.enviroments_books;
 import static com.dave.readingcat.Dashboard.last_read_stack;
 
@@ -36,12 +44,13 @@ public class FragmentAllBooks extends Fragment{
 
     AdapterAllBooks adapterAllBooks;
     RecyclerView recyclerViewAllBook;
-
     ArrayList<Article> allBookSharedPref = new ArrayList<>(); // Items in Screen
 
+    EditText editText;
+    private static final int READER_ACTIVITY_VALUE_TOKEN = 0;
     @Override
     public void onCreate(Bundle savedInstanceState){
-        super .onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState);
     }
 
     @Nullable
@@ -54,6 +63,7 @@ public class FragmentAllBooks extends Fragment{
         recyclerViewAllBook.setLayoutManager(new LinearLayoutManager(getContext()));
         adapterAllBooks = new AdapterAllBooks(getContext(), allBookSharedPref);
         recyclerViewAllBook.setAdapter(adapterAllBooks);
+        editText = view.findViewById(R.id.edittext_AllBook);
 
         adapterAllBooks.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -78,7 +88,35 @@ public class FragmentAllBooks extends Fragment{
                 }
             }
         });
+
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                filter(s.toString());
+            }
+        });
         return view;
+    }
+
+    private void filter(String text){
+        ArrayList<Article> filteredList = new ArrayList<>();
+
+        for(Article article : allBookSharedPref){
+            if(new File(article.getArticle_path()).getName().toLowerCase().contains(text.toLowerCase())){
+                filteredList.add(article);
+            }
+        }
+        adapterAllBooks.filterList(filteredList);
     }
 
     // Carga todos los datos de enviroments_books(Dashboard) en allBookSharedPref con exepcion de los eliminados
@@ -221,6 +259,30 @@ public class FragmentAllBooks extends Fragment{
         Intent intent = new Intent(getActivity(), Viewer_pdf.class);
         intent.putExtra("BOOK_NAME", book_name);
         intent.putExtra("BOOK_PATH", book_path);
-        startActivity(intent);
+        //startActivity(intent);
+        startActivityForResult(intent, READER_ACTIVITY_VALUE_TOKEN);
+
+        adapterAllBooks.notifyItemChanged(recyclerViewAllBook.getChildAdapterPosition(v));
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(resultCode == Activity.RESULT_OK){
+            if(requestCode == READER_ACTIVITY_VALUE_TOKEN && data!=null){
+                /*Information received*/
+                String returnedString = data.getStringExtra("local_updated_path");
+
+                Article temp_art = new Article();
+                temp_art.setArticle_path(returnedString);
+
+                int temp_index = allBookSharedPref.indexOf(temp_art);
+                if(temp_index == -1){ Toast.makeText(getContext(), "Imposible actualizar token", Toast.LENGTH_SHORT).show();}
+                else{
+                    adapterAllBooks.notifyDataSetChanged();
+                }
+            }
+        }
     }
 }

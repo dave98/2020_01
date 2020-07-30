@@ -1,12 +1,16 @@
 package com.dave.readingcat.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -35,6 +39,8 @@ public class FragmentNotifications extends Fragment {
     RecyclerView recyclerViewNotifications;
     ArrayList<Article> notificationsSharedPref = new ArrayList<>();
 
+    EditText editText;
+    private static final int READER_ACTIVITY_VALUE_TOKEN = 0;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -45,6 +51,7 @@ public class FragmentNotifications extends Fragment {
         recyclerViewNotifications.setLayoutManager(new LinearLayoutManager(getContext()));
         adapterNotification = new AdapterNotification(getContext(), notificationsSharedPref);
         recyclerViewNotifications.setAdapter(adapterNotification);
+        editText = view.findViewById(R.id.edittext_Notification);
 
         adapterNotification.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,7 +76,35 @@ public class FragmentNotifications extends Fragment {
                 }
             }
         });
+
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                filter(s.toString());
+            }
+        });
         return view;
+    }
+
+    private void filter(String text){
+        ArrayList<Article> filteredList = new ArrayList<>();
+
+        for(Article article : notificationsSharedPref){
+            if(new File(article.getArticle_path()).getName().toLowerCase().contains(text.toLowerCase())){
+                filteredList.add(article);
+            }
+        }
+        adapterNotification.filterList(filteredList);
     }
 
     private void LoadData(){
@@ -206,7 +241,29 @@ public class FragmentNotifications extends Fragment {
         Intent intent = new Intent(getActivity(), Viewer_pdf.class);
         intent.putExtra("BOOK_NAME", book_name);
         intent.putExtra("BOOK_PATH", book_path);
-        startActivity(intent);
+        startActivityForResult(intent, READER_ACTIVITY_VALUE_TOKEN);
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(resultCode == Activity.RESULT_OK){
+            if(requestCode == READER_ACTIVITY_VALUE_TOKEN && data!=null){
+                /*Information received*/
+                String returnedString = data.getStringExtra("local_updated_path");
+
+                Article temp_art = new Article();
+                temp_art.setArticle_path(returnedString);
+
+                int temp_index = notificationsSharedPref.indexOf(temp_art);
+                if(temp_index == -1){ Toast.makeText(getContext(), "Imposible actualizar token", Toast.LENGTH_SHORT).show();}
+                else{
+                    adapterNotification.notifyDataSetChanged();
+                }
+            }
+        }
+    }
+
 
 }

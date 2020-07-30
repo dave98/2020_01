@@ -56,11 +56,12 @@ public class AdapterGarbage extends RecyclerView.Adapter<AdapterGarbage.ViewHold
                 .load(uri).thumbnail(0.1f).into(holder.book_image);
         */
 
-        if(articles_in.get(position).getIs_favorite()){ holder.book_garbage.setColorFilter(Color.BLACK); }
+        if(articles_in.get(position).getIs_deleted()){ holder.book_garbage.setColorFilter(Color.BLACK); }
         else{ holder.book_garbage.setColorFilter(Color.GRAY); }
 
 
         holder.book_garbage.setOnClickListener(this);
+        holder.book_garbage_forever.setOnClickListener(this);
     }
 
     @Override
@@ -80,6 +81,7 @@ public class AdapterGarbage extends RecyclerView.Adapter<AdapterGarbage.ViewHold
         TextView book_size;
 
         ImageButton book_garbage;
+        ImageButton book_garbage_forever;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -89,6 +91,7 @@ public class AdapterGarbage extends RecyclerView.Adapter<AdapterGarbage.ViewHold
             book_size = (TextView) itemView.findViewById(R.id.card_desc_2);
 
             book_garbage = (ImageButton) itemView.findViewById(R.id.card_garbage);
+            book_garbage_forever = (ImageButton) itemView.findViewById(R.id.card_garbage_forever);
         }
     }
 }
